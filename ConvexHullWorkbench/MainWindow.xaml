@@ -1,0 +1,406 @@
+﻿<Window xmlns:oxy="http://oxyplot.org/wpf"  x:Class="ConvexHullWorkbench.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ConvexHullWorkbench"
+        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        mc:Ignorable="d"
+        Title="ConvexHull Test Bench by Eric Ouellet" Height="900" Width="1800">
+	<Window.DataContext>
+		<local:MainWindowModel></local:MainWindowModel>
+	</Window.DataContext>
+
+	<Window.Resources>
+		<Style TargetType="GroupBox">
+			<Setter Property="Margin" Value="5"></Setter>
+			<Setter Property="Padding" Value="9,5,5,5"></Setter>
+		</Style>
+
+		<Style TargetType="StackPanel" x:Key="Choice">
+			<Setter Property="Orientation" Value="Horizontal"></Setter>
+			<Setter Property="Height" Value="18"></Setter>
+		</Style>
+		
+		
+		<Style TargetType="Button">
+			<Setter Property="Margin" Value="3"></Setter>
+		</Style>
+
+		<Style TargetType="Rectangle">
+			<Setter Property="Margin" Value="5,0,0,0"></Setter>
+			<Setter Property="Stroke" Value="Black"></Setter>
+		</Style>
+
+		<CollectionViewSource x:Key="CollectionViewSourceMessages" Source="{Binding Messages}">
+			<CollectionViewSource.SortDescriptions>
+				<componentModel:SortDescription PropertyName="Index" Direction="Descending"></componentModel:SortDescription>
+			</CollectionViewSource.SortDescriptions>
+
+		</CollectionViewSource>
+
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="12*"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="3*"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="2*"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="3*"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+
+				<!-- A bug exists that prevent viewing the PlotModel in design mode if not in "Any Cpu"-->
+				<!--Model="{Binding PlotModel}"-->
+				<oxy:PlotView Name="PlotViewMain"/>
+
+				<GridSplitter Grid.Row="1" Height="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+
+				<ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"></RowDefinition>
+							<RowDefinition Height="Auto"></RowDefinition>
+						</Grid.RowDefinitions>
+
+						<Grid HorizontalAlignment="Stretch">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"></ColumnDefinition>
+								<ColumnDefinition Width="*"></ColumnDefinition>
+							</Grid.ColumnDefinitions>
+
+							<GroupBox Name="GroupBoxPointGenerators" Header="Point Generator" Grid.Column="0" Width="300" Background="LightGreen">
+								<StackPanel>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"></ColumnDefinition>
+											<ColumnDefinition Width="20"></ColumnDefinition>
+											<ColumnDefinition Width="Auto"></ColumnDefinition>
+										</Grid.ColumnDefinitions>
+
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="40"></ColumnDefinition>
+												<ColumnDefinition Width="Auto"></ColumnDefinition>
+											</Grid.ColumnDefinitions>
+
+											<StackPanel Grid.Column="1">
+												<StackPanel.Resources>
+													<Style TargetType="RadioButton">
+														<Setter Property="Margin" Value="-40,0,0,0"></Setter>
+													</Style>
+												</StackPanel.Resources>
+
+												<RadioButton GroupName="PointCount" IsChecked="{Binding IsCountOfPointSpecific}">Fix count of points</RadioButton>
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+													<TextBlock Text="Count: "></TextBlock>
+													<TextBox Width="70" Text="{Binding CountOfPoint}"></TextBox>
+												</StackPanel>
+												<RadioButton GroupName="PointCount" IsChecked="{Binding IsCountOfPointRandom}">Random count of points</RadioButton>
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+													<TextBlock Text="Min: "></TextBlock>
+													<TextBox Width="70" Text="{Binding CountOfPointMin}"></TextBox>
+												</StackPanel>
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+													<TextBlock Text="Max: "></TextBlock>
+													<TextBox Width="70" Text="{Binding CountOfPointMax}"></TextBox>
+												</StackPanel>
+											</StackPanel>
+										</Grid>
+
+										<Grid Grid.Column="2">
+											<Grid.RowDefinitions>
+												<RowDefinition Height="Auto"></RowDefinition>
+												<RowDefinition Height="Auto"></RowDefinition>
+											</Grid.RowDefinitions>
+											<TextBlock>Point Generator</TextBlock>
+											<ListBox Grid.Row="1" ItemsSource="{Binding PointGeneratorManager.Generators}"
+													Height="Auto" SelectionMode="Single" SelectedItem="{Binding PointGeneratorSelected}" ToolTip="{Binding Description}">
+
+												<ListBox.ItemTemplate>
+													<DataTemplate>
+														<TextBlock Text="{Binding Name}" ToolTip="{Binding Description}" />
+													</DataTemplate>
+												</ListBox.ItemTemplate>
+											</ListBox>
+										</Grid>
+									</Grid>
+
+									<TextBlock TextWrapping="Wrap" FontStyle="Italic">Using more than 20 000 points on the OxyPlot could lead to extreme slowness.</TextBlock>
+									<TextBlock TextWrapping="Wrap" FontStyle="Italic">Using more than 50 000 000 points to feed the ConvexHull could blow memory.</TextBlock>
+									<TextBlock TextWrapping="Wrap" FontStyle="Italic">For the smallest enclosing circle, 1000 points could take few minutes.</TextBlock>
+
+								</StackPanel>
+							</GroupBox>
+							<GroupBox Header="Algorithms" Grid.Column="1" HorizontalAlignment="Stretch" Background="LightPink">
+								<StackPanel>
+									<DataGrid Name="GridAlgorithms" ItemsSource="{Binding AlgorithmManager.Algorithms}" SelectionMode="Single"  SelectionUnit="FullRow"
+                                          AutoGenerateColumns="False" CanUserSortColumns="true" HorizontalAlignment="Stretch" 
+                                          ScrollViewer.CanContentScroll="True" EnableColumnVirtualization="false" EnableRowVirtualization="false"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
+										  Grid.Column="1" Height="220" Background="Transparent">
+
+										<DataGrid.Columns>
+											<DataGridTemplateColumn Header="*">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<CheckBox IsChecked="{Binding Path=IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+
+											<DataGridTextColumn IsReadOnly="True" Binding="{Binding AlgorithmType}" Header="Type"></DataGridTextColumn>
+											<DataGridTextColumn IsReadOnly="True" Binding="{Binding Name}" Header="Name">
+												<DataGridTextColumn.ElementStyle>
+													<Style>
+														<Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+													</Style>
+												</DataGridTextColumn.ElementStyle>
+											</DataGridTextColumn>
+											<DataGridTextColumn IsReadOnly="True" Binding="{Binding Author}" Header="Author (Algo, Code)"></DataGridTextColumn>
+											<DataGridTextColumn IsReadOnly="True" Binding="{Binding Comment}" Header="Comment">
+												<DataGridTextColumn.ElementStyle>
+													<Style>
+														<Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+													</Style>
+												</DataGridTextColumn.ElementStyle>
+											</DataGridTextColumn>
+										</DataGrid.Columns>
+									</DataGrid>
+
+									<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+									<Button Click="ButtonClearAllClick">Clear all</Button>
+										<Button Click="ButtonSelectAllClick" Padding="5,0,0,0">Select all</Button>
+									</StackPanel>
+								</StackPanel>
+							</GroupBox>
+						</Grid>
+
+						<WrapPanel Grid.Row="4" >
+							<GroupBox Width="300">
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Speed test"></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<TextBlock>>>></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+									</StackPanel>
+								</GroupBox.Header>
+									
+									<StackPanel>
+									<WrapPanel>
+										<Button Name="ButtonSpeedTest" Click="SpeedTestClick">Start test</Button>
+										<TextBlock Text="Iterations: " VerticalAlignment="Center"></TextBlock>
+										<TextBox Text="{Binding CountOfTest, UpdateSourceTrigger=PropertyChanged}" Width="80" VerticalAlignment="Center"></TextBox>
+									</WrapPanel>
+									<TextBlock TextWrapping="Wrap" FontStyle="Italic">Should be run in x64 Release to get approriate results. Will get the time in milliseconds directly into the native implentation language (if apply).</TextBlock>
+								</StackPanel>
+							</GroupBox>
+
+							<GroupBox Width="380">
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Sample test"></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<TextBlock>>>></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+									</StackPanel>
+								</GroupBox.Header>
+
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Name="GeneratePoints" Click="GeneratePoints_Click">Generate Points</Button>
+										<Button Name="GenerateHull" Click="StartAlgorithms_Click">Start algorithms</Button>
+									</WrapPanel>
+									<TextBlock TextWrapping="Wrap" FontStyle="Italic">Simple Tests to have an idea of the 'Point Generator' and the Convex Hull. Better select low amount of points (points &lt; ~10000) because of slow graph control.</TextBlock>
+								</StackPanel>
+
+							</GroupBox>
+
+							<GroupBox Width="660">
+
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Check validity (with sets of tests)"></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<TextBlock>>>></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+									</StackPanel>
+								</GroupBox.Header>
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Name="AlgorithmTests" Click="AlgorithmTestsOnClick">Algorithm extensive tests</Button>
+									</WrapPanel>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">Test selected Convex Hull algo using specific set of points, not the 'Point Generator'. Sets: basic simple tests, set of 12 points (~square) and a set of 11 points (~arc). Tests on 2 last sets are tested for every possible permutations by set: (12! + 11!) * 4 quadrant = 2 075 676 600 tests. It takes hours. See bottom right corner. On errors, message box will appear and points in error will be displayed on the graphic.</TextBlock>
+								</StackPanel>
+							</GroupBox>
+
+							<GroupBox Width="480">
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Side-by-side algorithm validity check"></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
+										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<TextBlock>>>></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+									</StackPanel>
+								</GroupBox.Header>
+
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Name="ButtonValidateAgainstOuelletSharpSingleThread" 
+                                    Click="ValidateAgainstOuelletSharpSingleThreadClick">Start Test</Button>
+										<TextBlock Text="Iterations: " VerticalAlignment="Center"></TextBlock>
+										<TextBox Text="{Binding CountOfTest, UpdateSourceTrigger=PropertyChanged}" Width="80" VerticalAlignment="Center"></TextBox>
+									</WrapPanel>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">Test selected Convex Hull algo against 'Ouellet Single Thread' using the 'Point Generator'. Graphics is updated only when an error is found. Mainly here to show Pat Morin little bug, better select 1000 points or less and select at least Pat Morin algo. Diffs are shown on the graphic.</TextBlock>
+								</StackPanel>
+							</GroupBox>
+
+							<GroupBox Width="580">
+
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Deep performance test"></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<TextBlock>>>></TextBlock>
+										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
+										<Image Width="16" Height="16" Source="Images/Excel16.png"></Image>
+									</StackPanel>
+								</GroupBox.Header>
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Click="TestForArticle">Start test</Button>
+										<ListBox Grid.Row="1" ItemsSource="{Binding PointGeneratorManager.Generators}" 
+													Height="Auto" SelectionMode="Extended">
+
+											<ListBox.Resources>
+												<Style TargetType="ListBox">
+													<Setter Property="ItemsPanel">
+														<Setter.Value>
+															<ItemsPanelTemplate>
+																<StackPanel Orientation="Horizontal"/>
+															</ItemsPanelTemplate>
+														</Setter.Value>
+													</Setter>
+												</Style>
+											</ListBox.Resources>
+
+											<!--<ListBox.ItemsPanel>
+												<ItemsPanelTemplate>
+													<StackPanel Orientation="Horizontal"/>
+												</ItemsPanelTemplate>
+											</ListBox.ItemsPanel>-->
+
+											<ListBox.ItemContainerStyle>
+												<Style TargetType="ListBoxItem">
+													<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+												</Style>
+											</ListBox.ItemContainerStyle>
+
+											<ListBox.ItemTemplate>
+												<DataTemplate>
+													<CheckBox IsChecked="{Binding IsSelected}" Margin="2,0,3,0">
+														<TextBlock Text="{Binding Name}" ToolTip="{Binding Description}" />
+													</CheckBox>
+												</DataTemplate>
+											</ListBox.ItemTemplate>
+										</ListBox>
+
+										<TextBlock Margin="7,0,2,0">Max</TextBlock>
+										<ComboBox ItemsSource="{Binding CountOfInputPoints}" SelectedIndex="{Binding CountIndexSelected}" Width="90" ></ComboBox>
+									</WrapPanel>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">Get millisec of each selected Convex Hull algorithms on each 'point generators' (multi selection in this group box). Each algo is tested on the same set of points once. Each test is made on an average of 10 times (10 x different set of values). Each batch of test is made on 10, 100, 1000, up to 50 000 000 points. Results in excel. It takes hours.</TextBlock>
+								</StackPanel>
+							</GroupBox>
+
+							<GroupBox Width="280">
+
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Test Div vs Mult for double"></TextBlock>
+									</StackPanel>
+								</GroupBox.Header>
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Click="TestDivVsMult">Start test</Button>
+									</WrapPanel>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">The test last around 2 minutes and give an idea of the ratio 'mult cycle time' /  'div cycle time'. On my machine, mult is ~1.19 faster than div.</TextBlock>
+								</StackPanel>
+							</GroupBox>
+
+						</WrapPanel>
+					</Grid>
+				</ScrollViewer>
+			</Grid>
+
+			<GridSplitter Grid.Column="1" Width="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+
+			<Rectangle Grid.Column="2" Fill="LightYellow"/>
+
+			<ListBox Name="ListBoxLog" Grid.Column="2" 
+					 ItemsSource="{Binding Source={StaticResource CollectionViewSourceMessages}}" 
+					 Background="LightYellow">
+				<ListBox.Resources>
+					<Style TargetType="ListBoxItem">
+						<Setter Property="Background" Value="Transparent" />
+					</Style>
+				</ListBox.Resources>
+			</ListBox>
+		</Grid>
+
+
+		<StatusBar Grid.Row="1">
+			<StatusBarItem HorizontalAlignment="Right">
+				<StackPanel Orientation="Horizontal">
+					<Button Name="QuickTest" Click="QuickTestClick" Visibility="Collapsed">Test</Button>
+
+					<!--<CheckBox IsChecked="{Binding Global.IsCancel, Mode=OneWay}" Foreground="Black">Canceled</CheckBox>-->
+					<TextBlock Text="Canceled">
+						<TextBlock.Resources>
+							<Style TargetType="TextBlock">
+								<Setter Property="Foreground" Value="Transparent"></Setter>
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding Global.Instance.IsCancel}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Foreground" Value="Black"></Setter>
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</TextBlock.Resources>
+					</TextBlock>
+					<Button Click="ButtonCancelOnClick">Cancel</Button>
+					<TextBlock Text="Quadrant: " Margin="12,0,0,0"></TextBlock>
+					<TextBlock Text="{Binding Global.Instance.Quadrant}" Width="40"></TextBlock>
+					<TextBlock Text="Iterations: "></TextBlock>
+					<TextBlock Text="{Binding Iteration}" Width="80"></TextBlock>
+				</StackPanel>
+			</StatusBarItem>
+		</StatusBar>
+	</Grid>
+</Window>

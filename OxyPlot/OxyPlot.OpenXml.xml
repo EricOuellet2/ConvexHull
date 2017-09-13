@@ -1,0 +1,288 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OxyPlot.OpenXml</name>
+    </assembly>
+    <members>
+        <member name="T:OxyPlot.OpenXml.NamespaceDoc">
+            <summary>
+            The OxyPlot.OpenXml namespace contains functionality to generate OpenXml (Word) documents from the OxyPlot.Reporting report model.
+            </summary>
+        </member>
+        <member name="T:OxyPlot.OpenXml.WordDocumentReportWriter">
+            <summary>
+            Provides a report writer for Word/OpenXML output using OpenXML SDK 2.0.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.BodyTextId">
+            <summary>
+            The body text id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.BodyTextName">
+            <summary>
+            The body text name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.FigureTextId">
+            <summary>
+            The figure text id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.FigureTextName">
+            <summary>
+            The figure text name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.HeaderId">
+            <summary>
+            The header id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.HeaderName">
+            <summary>
+            The header name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableCaptionId">
+            <summary>
+            The table caption id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableCaptionName">
+            <summary>
+            The table caption name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableHeaderId">
+            <summary>
+            The table header id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableHeaderName">
+            <summary>
+            The table header name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableTextId">
+            <summary>
+            The table text id.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.TableTextName">
+            <summary>
+            The table text name.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.stylePart">
+            <summary>
+            The style part.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.body">
+            <summary>
+            The body.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.disposed">
+            <summary>
+            The disposed flag.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.document">
+            <summary>
+            The document.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.isSaved">
+            <summary>
+            The is saved flag.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.mainPart">
+            <summary>
+            The main part.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.package">
+            <summary>
+            The package.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.OpenXml.WordDocumentReportWriter.style">
+            <summary>
+            The style.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.OpenXml.WordDocumentReportWriter" /> class.
+            </summary>
+            <param name="filePath">The file path.</param>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Creator">
+            <summary>
+            Gets or sets Creator.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Description">
+            <summary>
+            Gets or sets Description.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.FileName">
+            <summary>
+            Gets the name of the file.
+            </summary>
+            <value>The name of the file.</value>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Keywords">
+            <summary>
+            Gets or sets Keywords.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Revision">
+            <summary>
+            Gets or sets Revision.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Subject">
+            <summary>
+            Gets or sets Subject.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Title">
+            <summary>
+            Gets or sets Title.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.OpenXml.WordDocumentReportWriter.Version">
+            <summary>
+            Gets or sets Version.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.Save">
+            <summary>
+            Saves this document.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteDrawing(OxyPlot.Reporting.DrawingFigure)">
+            <summary>
+            The write drawing.
+            </summary>
+            <param name="d">The d.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteEquation(OxyPlot.Reporting.Equation)">
+            <summary>
+            The write equation.
+            </summary>
+            <param name="equation">The equation.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteHeader(OxyPlot.Reporting.Header)">
+            <summary>
+            The write header.
+            </summary>
+            <param name="h">The h.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteImage(OxyPlot.Reporting.Image)">
+            <summary>
+            The write image.
+            </summary>
+            <param name="i">The i.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteParagraph(OxyPlot.Reporting.Paragraph)">
+            <summary>
+            The write paragraph.
+            </summary>
+            <param name="pa">The pa.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WritePlot(OxyPlot.Reporting.PlotFigure)">
+            <summary>
+            The write plot.
+            </summary>
+            <param name="plot">The plot.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteReport(OxyPlot.Reporting.Report,OxyPlot.Reporting.ReportStyle)">
+            <summary>
+            The write report.
+            </summary>
+            <param name="report">The report.</param>
+            <param name="reportStyle">The style.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.WriteTable(OxyPlot.Reporting.Table)">
+            <summary>
+            The write table.
+            </summary>
+            <param name="t">The t.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.CreateParagraph(System.String,System.String)">
+            <summary>
+            The create paragraph.
+            </summary>
+            <param name="content">The content.</param>
+            <param name="styleId">The style id.</param>
+            <returns>The paragraph.</returns>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.CreateDocument">
+            <summary>
+            Creates the document.
+            </summary>
+            <returns>The <see cref="T:DocumentFormat.OpenXml.Wordprocessing.Document" />.</returns>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.CreateStyle(OxyPlot.Reporting.ParagraphStyle,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a style.
+            </summary>
+            <param name="ps">The paragraph style.</param>
+            <param name="styleId">The style id.</param>
+            <param name="styleName">The style name.</param>
+            <param name="basedOnStyleId">The based on style id.</param>
+            <param name="nextStyleId">The next style id.</param>
+            <param name="isDefault"><c>true</c> if the style is default.</param>
+            <param name="isCustomStyle"><c>true</c> if the style is a custom style.</param>
+            <returns>The <see cref="T:DocumentFormat.OpenXml.Wordprocessing.Style" />.</returns>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.AddStyles(DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart,OxyPlot.Reporting.ReportStyle)">
+            <summary>
+            Adds a style to the specified part.
+            </summary>
+            <param name="sdp">The style definition part.</param>
+            <param name="styleToAdd">The style.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.AppendImage(System.String,System.String)">
+            <summary>
+            The append image.
+            </summary>
+            <param name="source">The source.</param>
+            <param name="name">The name.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.CreateImageParagraph(System.String,System.String,System.String,System.Double,System.Double)">
+            <summary>
+            Creates an image paragraph.
+            </summary>
+            <param name="relationshipId">The relationship id.</param>
+            <param name="name">The name.</param>
+            <param name="description">The description.</param>
+            <param name="width">The width.</param>
+            <param name="height">The height.</param>
+            <returns>The <see cref="T:OxyPlot.Reporting.Paragraph" /> containing the image.</returns>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.Dispose(System.Boolean)">
+            <summary>
+            Releases unmanaged and - optionally - managed resources
+            </summary>
+            <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        </member>
+        <member name="M:OxyPlot.OpenXml.WordDocumentReportWriter.SetPackageProperties(DocumentFormat.OpenXml.Packaging.OpenXmlPackage)">
+            <summary>
+            Sets the package properties.
+            </summary>
+            <param name="p">The package.</param>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+rm -f *.dat
+
+shapes="s d c"
+sizes="10000 20000 30000 40000 50000 60000 70000 80000 90000 100000 \
+    150000 200000 300000 400000 500000"
+ranges="1.0 .1 .01 .001 .0001 .00001 .000001 .0000001 .00000001 .000000001"
+
+
+for w in $ranges; do
+    for n in $sizes; do
+	echo $w $n
+	rbox D2 s W$w $n > tmp.dat
+	echo "$w $n " `2dch < tmp.dat` >> 2dch.dat
+	echo "$w $n " `test1 -i tmp.dat -heaphull | grep "took" | awk '{print $3}'` >> heaphull2.dat
+	echo "$w $n " `test1 -i tmp.dat -heaphull -throwaway | grep "took" | awk '{print $3}'` >> heaphull2-wt.dat
+	echo "$w $n " `test1 -i tmp.dat -chanhull | grep "took" | awk '{print $3}'` >> chanhull.dat
+	echo "$w $n " `qhull < tmp.dat | grep "seconds" | awk '{print $8}'` >> qhull.dat
+    done
+    echo "" >> heaphull2.dat
+    echo "" >> heaphull2-wt.dat
+    echo "" >> chanhull.dat
+    echo "" >> qhull.dat
+    echo "" >> 2dch.dat
+done

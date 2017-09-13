@@ -1,0 +1,596 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OxyPlot.Pdf</name>
+    </assembly>
+    <members>
+        <member name="T:OxyPlot.Pdf.LatexReportWriter">
+            <summary>
+            Provides a report writer for <c>LaTeX2e</c>.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.title">
+            <summary>
+            The title.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.author">
+            <summary>
+            The author.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.fontsize">
+            <summary>
+            The font size.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.documentType">
+            <summary>
+            The document type.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.isDocumentEnded">
+            <summary>
+            Flag if the end of the document has been written.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.LatexReportWriter.indent">
+            <summary>
+            The indent.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.#ctor(System.IO.Stream,System.String,System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.Pdf.LatexReportWriter" /> class.
+            </summary>
+            <param name="s">The s.</param>
+            <param name="title">The title.</param>
+            <param name="author">The author.</param>
+            <param name="fontsize">The font size.</param>
+            <param name="documentType">The document type.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.BeginDocument">
+            <summary>
+            Begins the document.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.EndDocument">
+            <summary>
+            Ends the document.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.Indent">
+            <summary>
+            The indent.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.UnIndent">
+            <summary>
+            The un indent.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteDrawing(OxyPlot.Reporting.DrawingFigure)">
+            <summary>
+            Writes the drawing.
+            </summary>
+            <param name="d">The d.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteEquation(OxyPlot.Reporting.Equation)">
+            <summary>
+            Writes the equation.
+            </summary>
+            <param name="equation">The equation.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteHeader(OxyPlot.Reporting.Header)">
+            <summary>
+            Writes the header.
+            </summary>
+            <param name="h">The h.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteImage(OxyPlot.Reporting.Image)">
+            <summary>
+            Writes the image.
+            </summary>
+            <param name="i">The i.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteLatexHeader">
+            <summary>
+            Writes the latex header.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteParagraph(OxyPlot.Reporting.Paragraph)">
+            <summary>
+            Writes the paragraph.
+            </summary>
+            <param name="p">The p.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WritePlot(OxyPlot.Reporting.PlotFigure)">
+            <summary>
+            Writes the plot.
+            </summary>
+            <param name="plot">The plot.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteReport(OxyPlot.Reporting.Report,OxyPlot.Reporting.ReportStyle)">
+            <summary>
+            Writes the report.
+            </summary>
+            <param name="report">The report.</param>
+            <param name="reportStyle">The style.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteTable(OxyPlot.Reporting.Table)">
+            <summary>
+            Writes the table.
+            </summary>
+            <param name="t">The t.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.Dispose(System.Boolean)">
+            <summary>
+            Releases the unmanaged resources used by the <see cref="T:System.IO.StreamWriter" /> and optionally releases the managed resources.
+            </summary>
+            <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+            <exception cref="T:System.Text.EncoderFallbackException">The current encoding does not support displaying half of a Unicode surrogate pair.</exception>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.LatexEncodeText(System.String)">
+            <summary>
+            Encodes text.
+            </summary>
+            <param name="t">The text to encode.</param>
+            <returns>The encoded text.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteIndent">
+            <summary>
+            Writes the indent.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.LatexReportWriter.WriteIndentedLine(System.String)">
+            <summary>
+            Writes the indented line.
+            </summary>
+            <param name="s">The s.</param>
+        </member>
+        <member name="T:OxyPlot.Pdf.NamespaceDoc">
+            <summary>
+            The OxyPlot.Pdf namespace contains functionality to export plots and reports to .pdf files.
+            </summary>
+        </member>
+        <member name="T:OxyPlot.Pdf.PdfSharpExtensions">
+            <summary>
+            Provides extension methods for OxyPlot to PdfSharp type conversion.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfSharpExtensions.ToXRect(OxyPlot.OxyRect)">
+            <summary>
+            Converts an <see cref="T:OxyPlot.OxyRect" /> to an <see cref="T:PdfSharp.Drawing.XRect" />.
+            </summary>
+            <param name="r">The rectangle.</param>
+            <returns>The <see cref="T:PdfSharp.Drawing.XRect" /></returns>
+        </member>
+        <member name="T:OxyPlot.Pdf.RtfReportWriter">
+            <summary>
+            Provides a report writer for rich text format using MigraDoc.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.RtfReportWriter.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.Pdf.RtfReportWriter" /> class.
+            </summary>
+            <param name="filename">The FileName.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.RtfReportWriter.Close">
+            <summary>
+            The close.
+            </summary>
+        </member>
+        <member name="T:OxyPlot.Pdf.PdfExporter">
+            <summary>
+            Provides functionality to export plots to pdf.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfExporter.Width">
+            <summary>
+            Gets or sets the width (in points, 1/72 inch) of the output document.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfExporter.Height">
+            <summary>
+            Gets or sets the height (in points, 1/72 inch) of the output document.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfExporter.Background">
+            <summary>
+            Gets or sets the background color.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfExporter.Export(OxyPlot.IPlotModel,System.String,System.Double,System.Double)">
+            <summary>
+            Exports the specified model to a file.
+            </summary>
+            <param name="model">The model.</param>
+            <param name="path">The path.</param>
+            <param name="width">The width (points).</param>
+            <param name="height">The height (points).</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfExporter.Export(OxyPlot.IPlotModel,System.IO.Stream,System.Double,System.Double)">
+            <summary>
+            Exports the specified model to a stream.
+            </summary>
+            <param name="model">The model.</param>
+            <param name="stream">The output stream.</param>
+            <param name="width">The width (points).</param>
+            <param name="height">The height (points).</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfExporter.Export(OxyPlot.IPlotModel,System.IO.Stream)">
+            <summary>
+            Exports the specified <see cref="T:OxyPlot.PlotModel" /> to the specified <see cref="T:System.IO.Stream" />.
+            </summary>
+            <param name="model">The model.</param>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="T:OxyPlot.Pdf.PdfRenderContext">
+            <summary>
+            Provides a render context for portable document format using PdfSharp (and SilverPDF for Silverlight)
+            </summary>
+            <remarks>see http://pdfsharp.codeplex.com and http://silverpdf.codeplex.com</remarks>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.FontsizeFactor">
+            <summary>
+            The font size factor.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.doc">
+            <summary>
+            The pdf document.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.g">
+            <summary>
+            The PdfSharp graphics context.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.imagesInUse">
+            <summary>
+            The images in use
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.imageCache">
+            <summary>
+            The image cache
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfRenderContext.disposed">
+            <summary>
+            The disposed flag.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.#ctor(System.Double,System.Double,OxyPlot.OxyColor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.Pdf.PdfRenderContext" /> class.
+            </summary>
+            <param name="width">The width.</param>
+            <param name="height">The height.</param>
+            <param name="background">The background color.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawEllipse(OxyPlot.OxyRect,OxyPlot.OxyColor,OxyPlot.OxyColor,System.Double)">
+            <summary>
+            Draws an ellipse.
+            </summary>
+            <param name="rect">The rectangle.</param>
+            <param name="fill">The fill color.</param>
+            <param name="stroke">The stroke color.</param>
+            <param name="thickness">The thickness.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawLine(System.Collections.Generic.IList{OxyPlot.ScreenPoint},OxyPlot.OxyColor,System.Double,System.Double[],OxyPlot.LineJoin,System.Boolean)">
+            <summary>
+            Draws the polyline from the specified points.
+            </summary>
+            <param name="points">The points.</param>
+            <param name="stroke">The stroke color.</param>
+            <param name="thickness">The stroke thickness.</param>
+            <param name="dashArray">The dash array.</param>
+            <param name="lineJoin">The line join type.</param>
+            <param name="aliased">if set to <c>true</c> the shape will be aliased.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawPolygon(System.Collections.Generic.IList{OxyPlot.ScreenPoint},OxyPlot.OxyColor,OxyPlot.OxyColor,System.Double,System.Double[],OxyPlot.LineJoin,System.Boolean)">
+            <summary>
+            Draws the polygon from the specified points. The polygon can have stroke and/or fill.
+            </summary>
+            <param name="points">The points.</param>
+            <param name="fill">The fill color.</param>
+            <param name="stroke">The stroke color.</param>
+            <param name="thickness">The stroke thickness.</param>
+            <param name="dashArray">The dash array.</param>
+            <param name="lineJoin">The line join type.</param>
+            <param name="aliased">if set to <c>true</c> the shape will be aliased.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawRectangle(OxyPlot.OxyRect,OxyPlot.OxyColor,OxyPlot.OxyColor,System.Double)">
+            <summary>
+            Draws the rectangle.
+            </summary>
+            <param name="rect">The rectangle.</param>
+            <param name="fill">The fill color.</param>
+            <param name="stroke">The stroke color.</param>
+            <param name="thickness">The stroke thickness.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawText(OxyPlot.ScreenPoint,System.String,OxyPlot.OxyColor,System.String,System.Double,System.Double,System.Double,OxyPlot.HorizontalAlignment,OxyPlot.VerticalAlignment,System.Nullable{OxyPlot.OxySize})">
+            <summary>
+            Draws the text.
+            </summary>
+            <param name="p">The p.</param>
+            <param name="text">The text.</param>
+            <param name="fill">The fill color.</param>
+            <param name="fontFamily">The font family.</param>
+            <param name="fontSize">Size of the font.</param>
+            <param name="fontWeight">The font weight.</param>
+            <param name="rotate">The rotation angle.</param>
+            <param name="halign">The horizontal alignment.</param>
+            <param name="valign">The vertical alignment.</param>
+            <param name="maxSize">The maximum size of the text.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.MeasureText(System.String,System.String,System.Double,System.Double)">
+            <summary>
+            Measures the text.
+            </summary>
+            <param name="text">The text.</param>
+            <param name="fontFamily">The font family.</param>
+            <param name="fontSize">Size of the font.</param>
+            <param name="fontWeight">The font weight.</param>
+            <returns>The text size.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.Save(System.IO.Stream)">
+            <summary>
+            Saves the document to a stream.
+            </summary>
+            <param name="s">The stream.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.CleanUp">
+            <summary>
+            Cleans up.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.DrawImage(OxyPlot.OxyImage,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Boolean)">
+            <summary>
+            Draws the specified portion of the specified <see cref="T:OxyPlot.OxyImage" /> at the specified location and with the specified size.
+            </summary>
+            <param name="source">The source.</param>
+            <param name="srcX">The x-coordinate of the upper-left corner of the portion of the source image to draw.</param>
+            <param name="srcY">The y-coordinate of the upper-left corner of the portion of the source image to draw.</param>
+            <param name="srcWidth">Width of the portion of the source image to draw.</param>
+            <param name="srcHeight">Height of the portion of the source image to draw.</param>
+            <param name="destX">The x-coordinate of the upper-left corner of drawn image.</param>
+            <param name="destY">The y-coordinate of the upper-left corner of drawn image.</param>
+            <param name="destWidth">The width of the drawn image.</param>
+            <param name="destHeight">The height of the drawn image.</param>
+            <param name="opacity">The opacity.</param>
+            <param name="interpolate">interpolate if set to <c>true</c>.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.SetClip(OxyPlot.OxyRect)">
+            <summary>
+            Sets the clip rectangle.
+            </summary>
+            <param name="rect">The clip rectangle.</param>
+            <returns>True if the clip rectangle was set.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.ResetClip">
+            <summary>
+            Resets the clip rectangle.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.ToBrush(OxyPlot.OxyColor)">
+            <summary>
+            Converts an OxyColor to a brush.
+            </summary>
+            <param name="fill">The fill color.</param>
+            <returns>The brush.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.ToColor(OxyPlot.OxyColor)">
+            <summary>
+            Converts an OxyColor to an XColor.
+            </summary>
+            <param name="c">The source color.</param>
+            <returns>The color.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.ToPoints(System.Collections.Generic.IList{OxyPlot.ScreenPoint})">
+            <summary>
+            Converts a list of points.
+            </summary>
+            <param name="points">The list of points.</param>
+            <returns>The points.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.CreateFont(System.String,System.Double,PdfSharp.Drawing.XFontStyle)">
+            <summary>
+            Creates the specified font.
+            </summary>
+            <param name="fontFamily">The font family.</param>
+            <param name="fontSize">Size of the font.</param>
+            <param name="fontStyle">The font style.</param>
+            <returns>The font.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.GetImage(OxyPlot.OxyImage)">
+            <summary>
+            Gets or creates a <see cref="T:PdfSharp.Drawing.XImage" /> from the specified image.
+            </summary>
+            <param name="source">The source.</param>
+            <returns>The image</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfRenderContext.Dispose(System.Boolean)">
+            <summary>
+            Releases unmanaged and - optionally - managed resources
+            </summary>
+            <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        </member>
+        <member name="T:OxyPlot.Pdf.PdfReportWriter">
+            <summary>
+            Provides a report writer for portable document format using MigraDoc.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfReportWriter.temporaryPlotFiles">
+            <summary>
+            List of plot files created during report generation.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfReportWriter.currentSection">
+            <summary>
+            The current section.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfReportWriter.disposed">
+            <summary>
+            The disposed flag.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfReportWriter.isClosed">
+            <summary>
+            Flag if the document has been closed.
+            </summary>
+        </member>
+        <member name="F:OxyPlot.Pdf.PdfReportWriter.style">
+            <summary>
+            The style.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.Pdf.PdfReportWriter" /> class.
+            </summary>
+            <param name="filename">The FileName.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.#ctor(System.IO.Stream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:OxyPlot.Pdf.PdfReportWriter" /> class.
+            </summary>
+            <param name="output">The output <see cref="T:System.IO.Stream" />.</param>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfReportWriter.Document">
+            <summary>
+            Gets or sets the pdf document.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfReportWriter.Output">
+            <summary>
+            Gets the output stream.
+            </summary>
+        </member>
+        <member name="P:OxyPlot.Pdf.PdfReportWriter.CurrentSection">
+            <summary>
+            Gets the current section.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.DefineStyles(MigraDoc.DocumentObjectModel.Document,OxyPlot.Reporting.ReportStyle)">
+            <summary>
+            Defines the styles used in the document.
+            </summary>
+            <param name="document">The document.</param>
+            <param name="reportStyle">The report Style.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.Close">
+            <summary>
+            Closes this instance.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteDrawing(OxyPlot.Reporting.DrawingFigure)">
+            <summary>
+            Writes the specified drawing.
+            </summary>
+            <param name="d">The drawing.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteEquation(OxyPlot.Reporting.Equation)">
+            <summary>
+            Writes the specified equation.
+            </summary>
+            <param name="equation">The equation.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteHeader(OxyPlot.Reporting.Header)">
+            <summary>
+            Writes the specified header.
+            </summary>
+            <param name="h">The header.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteImage(OxyPlot.Reporting.Image)">
+            <summary>
+            Writes the specified image.
+            </summary>
+            <param name="i">The image.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteParagraph(OxyPlot.Reporting.Paragraph)">
+            <summary>
+            Writes the specified paragraph.
+            </summary>
+            <param name="p">The paragraph.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WritePlot(OxyPlot.Reporting.PlotFigure)">
+            <summary>
+            Writes the specified plot.
+            </summary>
+            <param name="plot">The plot.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.WriteReport(OxyPlot.Reporting.Report,OxyPlot.Reporting.ReportStyle)">
+            <summary>
+            Writes the specified report.
+            </summary>
+            <param name="report">The report.</param>
+            <param name="reportStyle">The report style.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.OxyPlot#Reporting#IReportWriter#WriteTable(OxyPlot.Reporting.Table)">
+            <summary>
+            Writes the specified table.
+            </summary>
+            <param name="table">The table.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.WriteStartFigure(OxyPlot.Reporting.Figure)">
+            <summary>
+            Writes the start of a figure.
+            </summary>
+            <param name="f">The figure.</param>
+            <returns>A paragraph</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.WriteEndFigure(OxyPlot.Reporting.Figure,MigraDoc.DocumentObjectModel.Paragraph)">
+            <summary>
+            Writes the figure text.
+            </summary>
+            <param name="f">The f.</param>
+            <param name="pa">The paragraph.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.ConvertToParagraphAlignment(OxyPlot.Reporting.Alignment)">
+            <summary>
+            Converts paragraph alignment.
+            </summary>
+            <param name="alignment">The alignment.</param>
+            <returns>The pdf alignment.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.SetStyle(MigraDoc.DocumentObjectModel.Style,OxyPlot.Reporting.ParagraphStyle)">
+            <summary>
+            Sets a paragraph style.
+            </summary>
+            <param name="style">The style.</param>
+            <param name="ps">The ps.</param>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.ToMigraDocColor(OxyPlot.OxyColor)">
+            <summary>
+            Converts an OxyColor to a migra doc color.
+            </summary>
+            <param name="c">The color.</param>
+            <returns>The converted color.</returns>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.CleanTemporaryPlotFiles">
+            <summary>
+            Erases the temporary plot files.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Pdf.PdfReportWriter.Dispose(System.Boolean)">
+            <summary>
+            Releases unmanaged and - optionally - managed resources
+            </summary>
+            <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,959 @@
+﻿<!DOCTYPE HTML>
+<!-- saved from url=(0054)https://bitlush.com/blog/efficient-avl-tree-in-c-sharp -->
+<!DOCTYPE html PUBLIC "" ""><HTML lang="en"><HEAD><META content="IE=11.0000" 
+http-equiv="X-UA-Compatible">
+	 
+<META charset="utf-8">	 <TITLE>Efficient AVL Tree in C# - Bitlush</TITLE>	 
+<META name="robots" content="NOODP">	 
+<META name="viewport" content="width=device-width, initial-scale=1">	 <LINK 
+href="http://bitlush.com/blog/efficient-avl-tree-in-c-sharp" rel="canonical">	 
+<STYLE type="text/css">html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font:inherit;font-size:100%;vertical-align:baseline}html{line-height:1}ol,ul{list-style:none}table{border-collapse:collapse;border-spacing:0}caption,th,td{text-align:left;font-weight:normal;vertical-align:middle}q,blockquote{quotes:none}q:before,q:after,blockquote:before,blockquote:after{content:"";content:none}a img{border:none}article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary{display:block}.middle .content,.header .content,.footer .content{margin:0 12px}@media (min-width: 1009px){.middle .content,.header .content,.footer .content{width:961px;margin:0 auto}}.header .links:after{content:'';display:table;clear:both}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;src:local("Roboto"),local("Roboto-Regular"),url(//fonts.gstatic.com/s/roboto/v15/CWB0XYA8bzo0kSThX0UTuA.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2212,U+2215,U+E0FF,U+EFFD,U+F000}html{line-height:inherit;height:100%;width:100%}body{height:100%;position:relative;display:table;width:100%;font-family:Roboto,Arial,Helvetica,"Open Sans",sans-serif;font-size:1.1rem;line-height:1.35rem;color:#000;-webkit-font-smoothing:antialiased}img{max-width:100%;height:auto}.middle{display:table-row;height:100%;width:100%}h1,h2{font-weight:bold;color:#4d3904;font-weight:normal}h1{font-size:2.2rem;line-height:2.7rem;margin:2.025rem 0 2.025rem 0}h2{margin:1.35rem 0 1.35rem 0;font-size:1.65rem;line-height:2.025rem}p{margin:0 0 1.35rem 0}a{color:#4b7035}b,strong{font-weight:bold}.keep-together{white-space:nowrap}pre{font-family:Monaco, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Lucida Console', Courier, monospace;font-size:0.95rem;word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;text-wrap:normal;margin-bottom:1.35rem;background-color:#d4e4ed;padding:.675rem .675rem}code{margin:0;padding:0}a.button{display:inline-block;line-height:2.7rem;background-color:#EB4F50;color:#fff;padding:0 1.35rem;cursor:pointer;text-decoration:none}.middle .content,.header .content,.footer .content{margin:0 12px}@media (min-width: 1009px){.middle .content,.header .content,.footer .content{width:961px;margin:0 auto}}.header .links:after{content:'';display:table;clear:both}.header{background-color:#fcee21;color:#fff;box-sizing:border-box}.header .content{padding:12px 0 .3375rem 0}.header .content li{display:inline-block;padding:0 .825rem 0 0}.header .content li:last-child{padding:0}@media (min-width: 1009px){.header .content{padding:2.7rem 0 .3375rem 0}}.header .links{display:block;color:#EB4F50;margin:.675rem 0 0 0;font-size:1.2375rem;line-height:1.35rem}@media (min-width: 1009px){.header .links{margin:1.0125rem 0 0 0}}.header .links li{float:left;margin-top:-2px}.header .links a{border-bottom-style:solid;border-bottom-width:2px;border-bottom-color:transparent;box-sizing:border-box}.header .logo img{width:auto;height:2.7rem}@media (min-width: 1009px){.header .logo img{width:auto;height:4.725rem}}.middle .content,.header .content,.footer .content{margin:0 12px}@media (min-width: 1009px){.middle .content,.header .content,.footer .content{width:961px;margin:0 auto}}.header .links:after{content:'';display:table;clear:both}.footer{display:table-row;background-color:#4d3904;padding:1.35rem 0}.footer .content{padding:1.35rem 0 .675rem 0}.footer,.footer a{color:#fff}.footer .home{text-align:center}.footer .copyright{margin-top:.3375rem;color:rgba(255,255,255,0.2)}@media (min-width: 1009px){.footer .copyright{margin-top:.675rem}}.footer .logo img{width:auto;height:1.35rem}@media (min-width: 1009px){.footer .logo img{width:auto;height:2.025rem}}
+</STYLE>
+	 <LINK href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+	 <LINK href="/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
+	 <LINK href="/android-chrome-192x192.png" rel="icon" type="image/png" sizes="192x192">
+	 <LINK href="/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
+	 <LINK href="/manifest.json" rel="manifest">	 <LINK href="/safari-pinned-tab.svg" 
+rel="mask-icon" color="#5bbad5">	 
+<META name="msapplication-TileColor" content="#fcee21">	 
+<META name="msapplication-TileImage" content="/mstile-144x144.png">	 
+<META name="theme-color" content="#ffffff">	 
+<META http-equiv="X-UA-Compatible" content="IE=EDGE,chrome=1">			 
+<STYLE type="text/css">article.post .tags a,article.post .tags span{display:inline-block;padding:.675rem 0}article.post .tags a{margin:.275rem}article.post .tags span{margin:.275rem 0}article.post p.tags{margin:0 0 .675rem 0}article.post p.tags:last-child{margin:0}article.post time{display:block;margin:-1.35rem 0 2.025rem 0}article.post ul{list-style-type:square}article.post li{margin-left:1.35rem;margin-bottom:.675rem}article.post li:last-child{margin-bottom:0}article.post ul{margin:0 0 1.35rem 0}article.post footer{border-top:1px solid #d4e4ed;margin-bottom:1.35rem;box-sizing:border-box}article time,article footer{color:rgba(0,0,0,0.5)}article.summary{margin-bottom:1.35rem}article.summary h2,article.summary p{margin:0}article.summary h2{padding-bottom:.3375rem}article.summary footer{margin-top:.3375rem}article.summary time{display:inline-block}.share a{margin-right:.55rem;display:inline-block}.share img{width:3.375rem;height:3.375rem}p.topics{margin:0 0 .3375rem 0}p.topics a{background-color:#d4e4ed;display:inline-block;padding:0 1.1rem;line-height:2.7rem;color:#4b7035;margin:0 .675rem 1.0125rem 0;text-decoration:none}p.topics a:last-child{margin-right:0}a.topics{background-color:#eee;display:inline-block;padding:0 .55rem;line-height:2.025rem;color:#4b7035;margin:0 .675rem 1.0125rem 0;text-decoration:none}a.topics:last-child{margin-right:0}
+</STYLE>
+ 
+<META name="GENERATOR" content="MSHTML 11.00.10570.1001"></HEAD> 
+<BODY>
+<DIV class="header">
+<DIV class="content">
+<DIV class="logo"><A href="https://bitlush.com/"><IMG class="logo" alt="" src="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/logo.svg"></A>
+		 </DIV>
+<UL class="links">
+  <LI><A href="https://bitlush.com/blog">Blog</A></LI>
+  <LI><A href="https://bitlush.com/contact">Contact</A></LI></UL></DIV></DIV>
+<DIV class="middle">
+<DIV class="content"><ARTICLE class="post"><HEADER>
+<H1>Efficient AVL Tree in C#</H1><time datetime="2012-02-02">February 2, 
+2012</time></HEADER>
+<P>The AVL tree is a rigorously balance binary search tree with very fast and 
+stable insert, delete and search times. I like the various .NET dictionaries but 
+have been unimpressed by their performance. So, after researching efficient 
+dictionary algorithms, I stumbled upon AVL trees and decided to code a really 
+efficient implementation (performance being my main concern). In this post I 
+will discuss the techniques I used to create a highly optimised AVL tree that 
+can be used like a dictionary (although I don't implement IDictionary for 
+brevity) with very fast and reliable performance under varied usage 
+scenarios.</P>
+<P>There are roughly two ways to code this algorithm: with or without recursion. 
+The non-recursive way is more efficient as the CLR does not have to keep pushing 
+and popping its call stack (which is quite slow). The non-recursive way is 
+unfortunately harder to code. So the challenge was on!</P>
+<P>There are also two ways to keep track of the balance of each tree node, 
+indirectly by storing the height, or directly by storing the balance. Again, 
+storing the balance directly is harder to code as a full understanding of how 
+rotations affect the balance of each node in the rotation is needed (useful and 
+reliable information on the internet is hard to find on how to keep track of 
+balances directly for deletion). Challenge number two!</P>
+<P>I will discuss the full implementation of an AVL tree in C# which tracks 
+balance by storing the balances directly and doesn’t use recursion. It out 
+performs Microsoft’s generic SortedDictionary&lt;TKey, TValue&gt; (which is 
+actually a red-black tree) by a factor of 2 for inserts and a factor of 4 for 
+searches.</P>
+<P>The complete source code can be downloaded as a zip file at the bottom of 
+this post so you don’t have to piece together the code from my walk through.</P>
+<H2>Node Height</H2>
+<P>Although I don’t use height in my AVL tree, it is useful to understand the 
+definition of height for the AVL algorithm. The height of a node is measured by 
+how many generations of descendents it has. The root node will therefore 
+increase in height as descendants are added to it:</P>
+<PRE><CODE>    R
+   / \
+  A   B
+ /
+C
+</CODE></PRE>
+<P>The root node R has a height of 2; nodes A and B have a height of 1; node C 
+has a height of 0.</P>
+<H2>Node Balance</H2>
+<P>I keep track of each node’s balance in my AVL tree. The balance of a node is 
+the difference in height between its left and right sub-tree.</P>
+<PRE><CODE>    R
+   / \
+  A   B
+   \
+    C
+</CODE></PRE>
+<P>The root node R has a balance of 1; node A has a balance of -1; nodes B and C 
+have a balance of 0.</P>
+<H2>Node Ordering</H2>
+<P>The nodes in an AVL tree are ordered so that a left child is always smaller 
+than its parent and a right child is always greater than its parent.</P>
+<P>The C# AVL Tree</P>
+<P>I’ll introduce the code as I go, so for now, let’s look at the AVL tree class 
+and node class:</P>
+<PRE><CODE>public class AvlTree&lt;TKey, TValue&gt; : IEnumerable&lt;TValue&gt;
+{
+   private IComparer&lt;TKey&gt; _comparer;
+   private AvlNode _root;
+
+   sealed class AvlNode
+   {
+      public AvlNode Parent;
+      public AvlNode Left;
+      public AvlNode Right;
+      public TKey Key;
+      public TValue Value;
+      public int Balance;
+   }
+
+   public AvlTree(IComparer&lt;TKey&gt; comparer)
+   {
+      _comparer = comparer;
+   }
+
+   public AvlTree()
+      : this(Comparer&lt;TKey&gt;.Default)
+   {
+
+   }
+
+   //...
+}
+</CODE></PRE>
+<P>Notice that the node class stores its parent, this isn’t necessary, but if 
+you don’t you’ll need to keep track of the parents as the tree is traversed 
+which would make the algorithm slower, but lighter on memory.</P>
+<H2>Node Insertion</H2>
+<P>When a new node is added to an AVL tree, it must be added in the right place 
+to make sure the tree remains ordered. The sequence at which nodes are added to 
+an AVL tree will affect the structure (i.e. two trees with the same nodes might 
+have different structures).</P>
+<H2>Consider these two trees:</H2>
+<PRE><CODE>    5
+   / \
+  3   6
+   \
+    4
+    4
+   / \
+  3   6
+     /
+    5
+</CODE></PRE>
+<P>These AVL trees are valid, they both have the same node values, and they are 
+both in order. Due to the order in which the nodes were added, however, their 
+structures are slightly different.</P>
+<P>The algorithm for adding a new node is this:</P>
+<PRE><CODE>public void Insert(TKey key, TValue value)
+{
+   if (_root == null)
+   {
+      _root = new AvlNode { Key = key, Value = value };
+   }
+   else
+   {
+      AvlNode node = _root;
+
+      while (node != null)
+      {
+         int compare = _comparer.Compare(key, node.Key);
+
+         if (compare &lt; 0)
+         {
+            AvlNode left = node.Left;
+
+            if (left == null)
+            {
+               node.Left = new AvlNode { Key = key, Value = value, Parent = node };
+
+               InsertBalance(node, 1);
+
+               return;
+            }
+            else
+            {
+               node = left;
+            }
+         }
+         else if (compare &gt; 0)
+         {
+            AvlNode right = node.Right;
+
+            if (right == null)
+            {
+               node.Right = new AvlNode { Key = key, Value = value, Parent = node };
+
+               InsertBalance(node, -1);
+
+               return;
+            }
+            else
+            {
+               node = right;
+            }
+         }
+         else
+         {
+            node.Value = value;
+
+            return;
+         }
+      }
+   }
+}
+</CODE></PRE>
+<H2>Balancing after Insertion</H2>
+<P>The method InsertBalance is necessary for rebalancing the tree after an 
+insertion. If the balance of a node becomes 2 or -2 it must be rotated. There 
+are four types of rotation: left, right, left-right and right-left:</P>
+<H2>Left Rotation</H2>
+<PRE><CODE>       (5)                   (4)
+      /   \                 /   \
+     (4)   S               /     \
+    /   \        ==&gt;     (3)     (5)
+   (3)   R               / \     / \
+  /   \                 /   \   /   \
+ P     Q               P     Q R     S
+</CODE></PRE>
+<H2>Left Right Rotation</H2>
+<P>This involves a left rotation with 3 and 4 followed by a right rotation with 
+4 and 5.</P>
+<PRE><CODE>       (5)                  (5)                 (4)
+      /   \                /   \               /   \
+     (3)   S              (4)   S             /     \
+    /   \        ==&gt;     /   \       ==&gt;    (3)     (5)
+   P    (4)             (3)   R             / \     / \
+       /   \           /   \               /   \   /   \
+      Q     R         P     Q             P     Q R     S
+</CODE></PRE>
+<H2>Right Rotation</H2>
+<PRE><CODE>     (3)                     (4)
+    /   \                   /   \
+   P   (4)                 /     \
+      /   \      ==&gt;     (3)     (5)
+     Q   (5)             / \     / \
+        /   \           /   \   /   \
+       R     S         P     Q R     S
+</CODE></PRE>
+<H2>Right Left Rotation</H2>
+<P>This involves a right rotation with 4 and 5 followed by a left rotation with 
+3 and 4.</P>
+<PRE><CODE>     (3)                 (3)                     (4)
+    /   \               /   \                   /   \
+   P   (5)             P   (4)                 /     \
+      /   \      ==&gt;      /   \      ==&gt;     (3)     (5)
+    (4)    D             Q   (5)             / \     / \
+   /   \                    /   \           /   \   /   \
+  B     C                  R     S         P     Q R     S
+</CODE></PRE>
+<P>There are two rules that allow the balancing for insertions to be 
+optimised</P>
+<UL>
+  <LI>After a rotation, the node will have a balance of 0 (this is not obvious 
+  from the rotation code for the left and right case and doesn't hold true for 
+  deletion)</LI>
+  <LI>If a node’s balance is 0 you can stop traversing back up the tree</LI></UL>
+<P>It also follows that you can stop traversing back up the tree if you perform 
+a rotation. These rules do not hold true for deletion.</P>
+<P>The method InsertBalance:</P>
+<PRE><CODE>private void InsertBalance(AvlNode node, int balance)
+{
+   while (node != null)
+   {
+      balance = (node.Balance += balance);
+
+      if (balance == 0)
+      {
+         return;
+      }
+      else if (balance == 2)
+      {
+         if (node.Left.Balance == 1)
+         {
+            RotateRight(node);
+         }
+         else
+         {
+            RotateLeftRight(node);
+         }
+
+         return;
+      }
+      else if (balance == -2)
+      {
+         if (node.Right.Balance == -1)
+         {
+            RotateLeft(node);
+         }
+         else
+         {
+            RotateRightLeft(node);
+         }
+
+         return;
+      }
+
+      AvlNode parent = node.Parent;
+
+      if (parent != null)
+      {
+         balance = parent.Left == node ? 1 : -1;
+      }
+
+      node = parent;
+   }
+}
+</CODE></PRE>
+<P>The balancing methods (notice how the balance is affected by rotation):</P>
+<PRE><CODE>private AvlNode RotateLeft(AvlNode node)
+{
+    AvlNode right = node.Right;
+    AvlNode rightLeft = right.Left;
+    AvlNode parent = node.Parent;
+
+    right.Parent = parent;
+    right.Left = node;
+    node.Right = rightLeft;
+    node.Parent = right;
+
+    if (rightLeft != null)
+    {
+        rightLeft.Parent = node;
+    }
+
+    if (node == _root)
+    {
+        _root = right;
+    }
+    else if (parent.Right == node)
+    {
+        parent.Right = right;
+    }
+    else
+    {
+        parent.Left = right;
+    }
+
+    right.Balance++;
+    node.Balance = -right.Balance;
+
+    return right;
+}
+
+private AvlNode RotateRight(AvlNode node)
+{
+    AvlNode left = node.Left;
+    AvlNode leftRight = left.Right;
+    AvlNode parent = node.Parent;
+
+    left.Parent = parent;
+    left.Right = node;
+    node.Left = leftRight;
+    node.Parent = left;
+
+    if (leftRight != null)
+    {
+        leftRight.Parent = node;
+    }
+
+    if (node == _root)
+    {
+        _root = left;
+    }
+    else if (parent.Left == node)
+    {
+        parent.Left = left;
+    }
+    else
+    {
+        parent.Right = left;
+    }
+
+    left.Balance--;
+    node.Balance = -left.Balance;
+
+    return left;
+}
+
+private AvlNode RotateLeftRight(AvlNode node)
+{
+    AvlNode left = node.Left;
+    AvlNode leftRight = left.Right;
+    AvlNode parent = node.Parent;
+    AvlNode leftRightRight = leftRight.Right;
+    AvlNode leftRightLeft = leftRight.Left;
+
+    leftRight.Parent = parent;
+    node.Left = leftRightRight;
+    left.Right = leftRightLeft;
+    leftRight.Left = left;
+    leftRight.Right = node;
+    left.Parent = leftRight;
+    node.Parent = leftRight;
+
+    if (leftRightRight != null)
+    {
+        leftRightRight.Parent = node;
+    }
+
+    if (leftRightLeft != null)
+    {
+        leftRightLeft.Parent = left;
+    }
+
+    if (node == _root)
+    {
+        _root = leftRight;
+    }
+    else if (parent.Left == node)
+    {
+        parent.Left = leftRight;
+    }
+    else
+    {
+        parent.Right = leftRight;
+    }
+
+    if (leftRight.Balance == -1)
+    {
+        node.Balance = 0;
+        left.Balance = 1;
+    }
+    else if (leftRight.Balance == 0)
+    {
+        node.Balance = 0;
+        left.Balance = 0;
+    }
+    else
+    {
+        node.Balance = -1;
+        left.Balance = 0;
+    }
+
+    leftRight.Balance = 0;
+
+    return leftRight;
+}
+
+private AvlNode RotateRightLeft(AvlNode node)
+{
+    AvlNode right = node.Right;
+    AvlNode rightLeft = right.Left;
+    AvlNode parent = node.Parent;
+    AvlNode rightLeftLeft = rightLeft.Left;
+    AvlNode rightLeftRight = rightLeft.Right;
+
+    rightLeft.Parent = parent;
+    node.Right = rightLeftLeft;
+    right.Left = rightLeftRight;
+    rightLeft.Right = right;
+    rightLeft.Left = node;
+    right.Parent = rightLeft;
+    node.Parent = rightLeft;
+
+    if (rightLeftLeft != null)
+    {
+        rightLeftLeft.Parent = node;
+    }
+
+    if (rightLeftRight != null)
+    {
+        rightLeftRight.Parent = right;
+    }
+
+    if (node == _root)
+    {
+        _root = rightLeft;
+    }
+    else if (parent.Right == node)
+    {
+        parent.Right = rightLeft;
+    }
+    else
+    {
+        parent.Left = rightLeft;
+    }
+
+    if (rightLeft.Balance == 1)
+    {
+        node.Balance = 0;
+        right.Balance = -1;
+    }
+    else if (rightLeft.Balance == 0)
+    {
+        node.Balance = 0;
+        right.Balance = 0;
+    }
+    else
+    {
+        node.Balance = 1;
+        right.Balance = 0;
+    }
+
+    rightLeft.Balance = 0;
+
+    return rightLeft;
+}
+</CODE></PRE>
+<H2>Deletion</H2>
+<P>When a node is deleted from an AVL tree, it must be removed correctly to make 
+sure the tree remains ordered. The logic to delete a node is somewhat harder to 
+implement than the code for insertion and I struggled for a while to understand 
+the AVL algorithm sufficiently so that I could not only code the delete portion 
+of the tree, but also ensure it was optimal.</P>
+<P>My implementation of delete considers each edge case separately so that no 
+unnecessary operations are performed:</P>
+<PRE><CODE>public bool Delete(TKey key)
+{
+   AvlNode node = _root;
+
+   while (node != null)
+   {
+      if (_comparer.Compare(key, node.Key) &lt; 0)
+      {
+         node = node.Left;
+      }
+      else if (_comparer.Compare(key, node.Key) &gt; 0)
+      {
+         node = node.Right;
+      }
+      else
+      {
+         AvlNode left = node.Left;
+         AvlNode right = node.Right;
+
+         if (left == null)
+         {
+            if (right == null)
+            {
+               if (node == _root)
+               {
+                  _root = null;
+               }
+               else
+               {
+                  AvlNode parent = node.Parent;
+
+                  if (parent.Left == node)
+                  {
+                     parent.Left = null;
+
+                     DeleteBalance(parent, -1);
+                  }
+                  else
+                  {
+                     parent.Right = null;
+
+                     DeleteBalance(parent, 1);
+                  }
+               }
+            }
+            else
+            {
+               Replace(node, right);
+
+               DeleteBalance(node, 0);
+            }
+         }
+         else if (right == null)
+         {
+            Replace(node, left);
+
+            DeleteBalance(node, 0);
+         }
+         else
+         {
+            AvlNode successor = right;
+
+            if (successor.Left == null)
+            {
+               AvlNode parent = node.Parent;
+
+               successor.Parent = parent;
+               successor.Left = left;
+               successor.Balance = node.Balance;
+
+               if (left != null)
+               {
+                  left.Parent = successor;
+               }
+
+               if (node == _root)
+               {
+                  _root = successor;
+               }
+               else
+               {
+                  if (parent.Left == node)
+                  {
+                     parent.Left = successor;
+                  }
+                  else
+                  {
+                     parent.Right = successor;
+                  }
+               }
+
+               DeleteBalance(successor, 1);
+            }
+            else
+            {
+               while (successor.Left != null)
+               {
+                  successor = successor.Left;
+               }
+
+               AvlNode parent = node.Parent;
+               AvlNode successorParent = successor.Parent;
+               AvlNode successorRight = successor.Right;
+
+               if (successorParent.Left == successor)
+               {
+                  successorParent.Left = successorRight;
+               }
+               else
+               {
+                  successorParent.Right = successorRight;
+               }
+
+               if (successorRight != null)
+               {
+                  successorRight.Parent = successorParent;
+               }
+
+               successor.Parent = parent;
+               successor.Left = left;
+               successor.Balance = node.Balance;
+               successor.Right = right;
+               right.Parent = successor;
+
+               if (left != null)
+               {
+                  left.Parent = successor;
+               }
+
+               if (node == _root)
+               {
+                  _root = successor;
+               }
+               else
+               {
+                  if (parent.Left == node)
+                  {
+                     parent.Left = successor;
+                  }
+                  else
+                  {
+                     parent.Right = successor;
+                  }
+               }
+
+               DeleteBalance(successorParent, -1);
+            }
+         }
+
+         return true;
+      }
+   }
+
+   return false;
+}
+</CODE></PRE>
+<H2>Balancing after Deletion</H2>
+<P>The added complexity of rebalancing a deletion is the possibility of more 
+than a single rotation to restore the tree to balance.</P>
+<P>There are several rules that allow the balancing for deletions to be 
+optimised:</P>
+<UL>
+  <LI>After a right rotation, the node will have a balance of 0 or -1</LI>
+  <LI>After a left rotation, the node will have a balance of 0 or 1</LI>
+  <LI>After a left-right or right-left rotation, the node will have a balance of 
+  0</LI>
+  <LI>If a node’s balance is 1 or -1 you can stop traversing back up the 
+  tree</LI></UL>
+<P>It follows that you must continue traversing and rebalancing up the tree even 
+after a rotation unless the last rule is met which is why we can end up with 
+more than one rotation during a deletion.</P>
+<P>Although deletion has many edge cases, the balancing portion of the code is 
+similar in complexity to insertion, however it is different (note that I have 
+heavily optimised the code so that no unnecessary operations are performed, for 
+instance after a rotate right, I only need to check for a balance of -1 to quit 
+rebalancing as the 1 case cannot occur due to the rules above):</P>
+<PRE><CODE>private void DeleteBalance(AvlNode node, int balance)
+{
+   while (node != null)
+   {
+      balance = (node.Balance += balance);
+
+      if (balance == 2)
+      {
+         if (node.Left.Balance &gt;= 0)
+         {
+            node = RotateRight(node);
+
+            if (node.Balance == -1)
+            {
+               return;
+            }
+         }
+         else
+         {
+            node = RotateLeftRight(node);
+         }
+      }
+      else if (balance == -2)
+      {
+         if (node.Right.Balance &lt;= 0)
+         {
+            node = RotateLeft(node);
+
+            if (node.Balance == 1)
+            {
+               return;
+            }
+         }
+         else
+         {
+            node = RotateRightLeft(node);
+         }
+      }
+      else if (balance != 0)
+      {
+         return;
+      }
+
+      AvlNode parent = node.Parent;
+
+      if (parent != null)
+      {
+         balance = parent.Left == node ? -1 : 1;
+      }
+
+      node = parent;
+   }
+}
+</CODE></PRE>
+<P>Here is the Replace method that is used by the Delete method:</P>
+<PRE><CODE>private static void Replace(AvlNode target, AvlNode source)
+{
+   AvlNode left = source.Left;
+   AvlNode right = source.Right;
+
+   target.Balance = source.Balance;
+   target.Key = source.Key;
+   target.Value = source.Value;
+   target.Left = left;
+   target.Right = right;
+
+   if (left != null)
+   {
+      left.Parent = target;
+   }
+
+   if (right != null)
+   {
+      right.Parent = target;
+   }
+}
+</CODE></PRE>
+<P>The final non-trivial task involving my pursuit of an efficient AVL tree is 
+in-order traversal of the tree structure without using recursion or a temporary 
+stack. As long as the parent of each node is available, it’s actually possible 
+to write an extremely efficient solution to this problem using .NET:</P>
+<PRE><CODE>IEnumerator IEnumerable.GetEnumerator()
+{
+   return GetEnumerator();
+}
+
+public IEnumerator&lt;TValue&gt; GetEnumerator()
+{
+   return new AvlNodeEnumerator(_root);
+}
+</CODE></PRE>
+<P>In my AvlTree class, this enumerator is nested inside it, and so the TValue 
+generic parameter is inherited from AvlTree&lt;TKey, TValue&gt;:</P>
+<PRE><CODE>sealed class AvlNodeEnumerator : IEnumerator&lt;TValue&gt;
+{
+   private AvlNode _root;
+   private Action _action;
+   private AvlNode _current;
+   private AvlNode _right;
+
+   public AvlNodeEnumerator(AvlNode root)
+   {
+      _right = _root = root;
+      _action = _root == null ? Action.End : Action.Right;
+   }
+
+   public bool MoveNext()
+   {
+      switch (_action)
+      {
+         case Action.Right:
+            _current = _right;
+
+            while (_current.Left != null)
+            {
+               _current = _current.Left;
+            }
+
+            _right = _current.Right;
+            _action = _right != null ? Action.Right : Action.Parent;
+
+            return true;
+
+         case Action.Parent:
+            while (_current.Parent != null)
+            {
+               AvlNode previous = _current;
+
+               _current = _current.Parent;
+
+               if (_current.Left == previous)
+               {
+                  _right = _current.Right;
+                  _action = _right != null ? Action.Right : Action.Parent;
+
+                  return true;
+               }
+            }
+
+            _action = Action.End;
+
+            return false;
+
+         default:
+            return false;
+      }
+   }
+
+   public void Reset()
+   {
+      _right = _root;
+      _action = _root == null ? Action.End : Action.Right;
+   }
+
+   public TValue Current
+   {
+      get
+      {
+         return _current.Value;
+      }
+   }
+
+   object IEnumerator.Current
+   {
+      get
+      {
+         return Current;
+      }
+   }
+
+   public void Dispose()
+   {
+   }
+
+   enum Action
+   {
+      Parent,
+      Right,
+      End
+   }
+}
+</CODE></PRE>
+<P>Finally here's the Search method:</P>
+<PRE><CODE>public bool Search(TKey key, out TValue value)
+{
+   AvlNode node = _root;
+
+   while (node != null)
+   {
+      if (_comparer.Compare(key, node.Key) &lt; 0)
+      {
+         node = node.Left;
+      }
+      else if (_comparer.Compare(key, node.Key) &gt; 0)
+      {
+         node = node.Right;
+      }
+      else
+      {
+         value = node.Value;
+
+         return true;
+      }
+   }
+
+   value = default(TValue);
+
+   return false;
+}
+</CODE></PRE>
+<P>And the Clear method:</P>
+<PRE><CODE>public void Clear()
+{
+   _root = null;
+}
+</CODE></PRE>
+<P>So there you have it, a complete AVL tree that doesn't use recursion and is a 
+whole lot faster for it! I hope you enjoy it, this one took me a while figure 
+out but it was worth it. I did write a lot of tests to ensure the code is rock 
+solid, however, I haven't included those so you'll just have to trust 
+me!</P><FOOTER>
+<P class="tags"><SPAN>Filed under:</SPAN>			 <A href="https://bitlush.com/blog/tags/algorithms">Algorithms</A>
+			 <A href="https://bitlush.com/blog/tags/c-sharp">C#</A>			 <A href="https://bitlush.com/blog/tags/performance">Performance</A>
+		 </P>
+<P class="share"><A href="https://twitter.com/share?url=http%3A%2F%2Fbitlush.com%2Fblog%2Fefficient-avl-tree-in-c-sharp" 
+rel="nofollow" alt="Share on Twitter"><IMG src="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/twitter-square.svg"></A>
+			 <A href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fbitlush.com%2Fblog%2Fefficient-avl-tree-in-c-sharp" 
+rel="nofollow" alt="Share on Facebook"><IMG src="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/facebook-square.svg"></A>
+			 <A href="https://plus.google.com/share?url=http%3A%2F%2Fbitlush.com%2Fblog%2Fefficient-avl-tree-in-c-sharp" 
+rel="nofollow" alt="Share on Google+"><IMG src="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/google-plus-square.svg"></A>
+		 </P></FOOTER></ARTICLE></DIV></DIV>
+<DIV class="footer">
+<DIV class="content">
+<DIV class="logo"><A href="https://bitlush.com/"><IMG class="logo" alt="" src="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/yorkshire-terrier.svg"></A>
+		 </DIV>
+<DIV class="copyright">© 2016 bitlush		 </DIV></DIV></DIV><LINK href="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/main-enhanced.css" 
+rel="stylesheet" type="text/css">			 <LINK href="Efficient%20AVL%20Tree%20in%20C%23%20-%20Bitlush_files/vs.min.css" 
+rel="stylesheet">	 
+<STYLE type="text/css">
+	.hljs {
+		background: none;
+		background-color: transparent;
+		padding: 0;
+	}
+	</STYLE>
+	 
+<SCRIPT onload="javascript: hljs.initHighlightingOnLoad();" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js" async=""></SCRIPT>
+	 
+<SCRIPT type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+		extensions: ["tex2jax.js"],
+		jax: ["input/TeX", "output/HTML-CSS"],
+		tex2jax: {
+		inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+		displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+		processEscapes: true
+		},
+		"HTML-CSS": { availableFonts: ["TeX"] }
+		});
+	</SCRIPT>
+	 
+<SCRIPT src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async=""></SCRIPT>
+	 
+<SCRIPT type="text/javascript">
+if (typeof _gaq == 'undefined') {
+	_gaq = [];
+}
+
+_gaq.push(["_setAccount", "UA-27373525-1"]);
+_gaq.push(["_trackPageview"]);
+
+(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</SCRIPT>
+ </BODY></HTML>

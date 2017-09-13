@@ -1,0 +1,6 @@
+.header .links a {
+	transition:0.15s ease-out; text-decoration: none; display: inline-block; position: relative;
+}
+.header .links a:hover {
+	border-bottom-color: rgb(75, 112, 53);
+}

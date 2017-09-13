@@ -1,0 +1,87 @@
+.hljs {
+	background: white; padding: 0.5em; color: black; display: block; -ms-overflow-x: auto;
+}
+.hljs-comment {
+	color: rgb(0, 128, 0);
+}
+.hljs-quote {
+	color: rgb(0, 128, 0);
+}
+.hljs-variable {
+	color: rgb(0, 128, 0);
+}
+.hljs-keyword {
+	color: rgb(0, 0, 255);
+}
+.hljs-selector-tag {
+	color: rgb(0, 0, 255);
+}
+.hljs-built_in {
+	color: rgb(0, 0, 255);
+}
+.hljs-name {
+	color: rgb(0, 0, 255);
+}
+.hljs-tag {
+	color: rgb(0, 0, 255);
+}
+.hljs-string {
+	color: rgb(163, 21, 21);
+}
+.hljs-title {
+	color: rgb(163, 21, 21);
+}
+.hljs-section {
+	color: rgb(163, 21, 21);
+}
+.hljs-attribute {
+	color: rgb(163, 21, 21);
+}
+.hljs-literal {
+	color: rgb(163, 21, 21);
+}
+.hljs-template-tag {
+	color: rgb(163, 21, 21);
+}
+.hljs-template-variable {
+	color: rgb(163, 21, 21);
+}
+.hljs-type {
+	color: rgb(163, 21, 21);
+}
+.hljs-addition {
+	color: rgb(163, 21, 21);
+}
+.hljs-deletion {
+	color: rgb(43, 145, 175);
+}
+.hljs-selector-attr {
+	color: rgb(43, 145, 175);
+}
+.hljs-selector-pseudo {
+	color: rgb(43, 145, 175);
+}
+.hljs-meta {
+	color: rgb(43, 145, 175);
+}
+.hljs-doctag {
+	color: rgb(128, 128, 128);
+}
+.hljs-attr {
+	color: rgb(255, 0, 0);
+}
+.hljs-symbol {
+	color: rgb(0, 176, 232);
+}
+.hljs-bullet {
+	color: rgb(0, 176, 232);
+}
+.hljs-link {
+	color: rgb(0, 176, 232);
+}
+.hljs-emphasis {
+	font-style: italic;
+}
+.hljs-strong {
+	font-weight: bold;
+}
