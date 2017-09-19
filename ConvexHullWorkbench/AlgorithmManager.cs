@@ -311,20 +311,5 @@ namespace ConvexHullWorkbench
 		public int AlgoIndexMiConvexHull { get; private set; }
 		public int AlgoIndexSmallestEnclosingCircle { get; private set; }
 		public int AlgoIndexSmallestEnclosingCircleFromConvexHull { get; private set; }
-
-		public class Vertex : IVertex
-		{
-			/// <summary>
-			/// Initializes a new instance of the <see cref="Vertex"/> class.
-			/// </summary>
-			/// <param name="x">The x position.</param>
-			/// <param name="y">The y position.</param>
-			public Vertex(double x, double y)
-			{
-				Position = new double[2] { x, y };
-			}
-
-			public double[] Position { get; set; }
-		}
 	}
 }

@@ -39,6 +39,11 @@
 
 		</CollectionViewSource>
 
+		<Rectangle x:Key="InputGenerator" Width="16" Height="16" Fill="LightGreen" ToolTip="Point Generator input" x:Shared="False"></Rectangle>
+		<Rectangle x:Key="InputAlgorithms" Width="16" Height="16" Fill="LightPink" ToolTip="Algorithms input" x:Shared="False"></Rectangle>
+		<Rectangle x:Key="OutputGraph" Width="16" Height="16" Fill="White" ToolTip="Output to graphic" x:Shared="False"></Rectangle>
+		<Rectangle x:Key="OutputLog" Width="16" Height="16" Fill="LightYellow" ToolTip="Output to the log" x:Shared="False"></Rectangle>
+
 	</Window.Resources>
 
 	<Grid>
@@ -195,11 +200,11 @@
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Speed test"></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
 										<TextBlock>>>></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
 								</GroupBox.Header>
 									
@@ -217,11 +222,11 @@
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Sample test"></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
 										<TextBlock>>>></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
 								</GroupBox.Header>
 
@@ -241,10 +246,10 @@
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Check validity (with sets of tests)"></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
 										<TextBlock>>>></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
 								</GroupBox.Header>
 
@@ -260,10 +265,10 @@
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Side-by-side algorithm validity check"></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightGreen"></Rectangle>
-										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
 										<TextBlock>>>></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="White"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
 									</StackPanel>
 								</GroupBox.Header>
 
@@ -280,14 +285,13 @@
 							</GroupBox>
 
 							<GroupBox Width="580">
-
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Deep performance test"></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightPink"></Rectangle>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
 										<TextBlock>>>></TextBlock>
-										<Rectangle Width="16" Height="16" Fill="LightYellow"></Rectangle>
-										<Image Width="16" Height="16" Source="Images/Excel16.png"></Image>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
+										<Image Width="16" Height="16" Source="Images/Excel16.png" Margin="3,0,0,0"></Image>
 									</StackPanel>
 								</GroupBox.Header>
 
@@ -296,7 +300,6 @@
 										<Button Click="TestForArticle">Start test</Button>
 										<ListBox Grid.Row="1" ItemsSource="{Binding PointGeneratorManager.Generators}" 
 													Height="Auto" SelectionMode="Extended">
-
 											<ListBox.Resources>
 												<Style TargetType="ListBox">
 													<Setter Property="ItemsPanel">
