@@ -297,7 +297,7 @@ namespace ConvexHullWorkbench
 				series.Points.Add(new ScatterPoint(_points[ptIndex].X, _points[ptIndex].Y)); // new DataPoint(0, 0));
 			}
 
-			var tmp = new PlotModel { Title = "Convex Hull Test Bench", Subtitle = $"'Sample test' with {series.Points.Count} points " };
+			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"'Sample test' with {series.Points.Count} points " };
 
 			SetOxyPlotDefaultColorPalette(tmp);
 
@@ -373,7 +373,7 @@ namespace ConvexHullWorkbench
 
 			Dictionary<Algorithm, ScatterSeries> algoToSeries = new Dictionary<Algorithm, ScatterSeries>();
 
-			var tmp = new PlotModel { Title = "Convex Hull Test Bench", Subtitle = $"Speed Test for {SelectedGeneratorDescription}" };
+			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"Speed Test for {SelectedGeneratorDescription}" };
 
 			SetOxyPlotDefaultColorPalette(tmp);
 
@@ -535,7 +535,7 @@ namespace ConvexHullWorkbench
 
 					if (diffs.Exception == null)
 					{
-						var tmp = new PlotModel { Title = "Convex Hull Test Bench", Subtitle = "Tests results" };
+						var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = "Tests results" };
 
 						var series = new LineSeries()
 						{
@@ -738,15 +738,15 @@ namespace ConvexHullWorkbench
 		// ******************************************************************
 		public int[] CountOfInputPoints { get; set; } = new int[] { 10, 100, 1000, 10000, 100000, 1000000, 10000000, 50000000 };
 
-		private int _countIndexSelected = 5;
-		public int CountIndexSelected
+		private int _indexOfLastInputPointsCount = 5;
+		public int IndexOfLastInputPointsCount
 		{
-			get { return _countIndexSelected; }
+			get { return _indexOfLastInputPointsCount; }
 			set
 			{
-				if (_countIndexSelected == value) return;
+				if (_indexOfLastInputPointsCount == value) return;
 
-				_countIndexSelected = value;
+				_indexOfLastInputPointsCount = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -792,7 +792,7 @@ namespace ConvexHullWorkbench
 			double[,,] stats = new double[algos.Count, pointGenerators.Count, CountOfInputPoints.Length];
 
 			// Data
-			for (int countOfInputPointsIndex = 0; countOfInputPointsIndex <= _countIndexSelected; countOfInputPointsIndex++)
+			for (int countOfInputPointsIndex = 0; countOfInputPointsIndex <= _indexOfLastInputPointsCount; countOfInputPointsIndex++)
 			{
 				for (int countOfSimulationWhereTheAverageIsDoneIndex = 0; countOfSimulationWhereTheAverageIsDoneIndex < countOfSimulationWhereTheAverageIsDone; countOfSimulationWhereTheAverageIsDoneIndex++)
 				{
@@ -831,12 +831,12 @@ namespace ConvexHullWorkbench
 
 			var listOfMinTimePerLine = new double[CountOfInputPoints.Length];
 
-			for (pointGeneratorIndex = 0; pointGeneratorIndex < CountIndexSelected; pointGeneratorIndex++)
-			{
-				ws.Cell(row++, dataStartCol - 1).Value = $"{pointGenerators[pointGeneratorIndex].Name} generator";
+            for (pointGeneratorIndex = 0; pointGeneratorIndex < pointGenerators.Count; pointGeneratorIndex++)
+            {
+            	ws.Cell(row++, dataStartCol - 1).Value = $"{pointGenerators[pointGeneratorIndex].Name} generator";
 
-				// Start: Header and also Ensure everything is properly loaded in memory
-				ws.Cell(row, dataStartCol - 1).Value = "Points";
+                    // Start: Header and also Ensure everything is properly loaded in memory
+                ws.Cell(row, dataStartCol - 1).Value = "Points";
 				algoIndex = 0;
 				foreach (var algo in algos)
 				{
@@ -847,7 +847,7 @@ namespace ConvexHullWorkbench
 				// End: Header and also Ensure everything is properly loaded in memory
 
 
-				for (int countOfInputPointsIndex = 0; countOfInputPointsIndex < CountOfInputPoints.Length; countOfInputPointsIndex++)
+				for (int countOfInputPointsIndex = 0; countOfInputPointsIndex <= _indexOfLastInputPointsCount; countOfInputPointsIndex++)
 				{
 					double minTimePerLine = 0;
 
@@ -887,7 +887,7 @@ namespace ConvexHullWorkbench
 				row++;
 				// End: Header and also Ensure everything is properly loaded in memory
 
-				for (int countOfInputPointsIndex = 0; countOfInputPointsIndex < CountOfInputPoints.Length; countOfInputPointsIndex++)
+				for (int countOfInputPointsIndex = 0; countOfInputPointsIndex <= _indexOfLastInputPointsCount; countOfInputPointsIndex++)
 				{
 					ws.Cell(row, dataStartCol - 1).Value = CountOfInputPoints[countOfInputPointsIndex];
 

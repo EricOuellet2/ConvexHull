@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ConvexHullWorkbench"
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
-        Title="ConvexHull Test Bench by Eric Ouellet" Height="900" Width="1800">
+        Title="ConvexHull workbench by Eric Ouellet" Height="900" Width="1800">
 	<Window.DataContext>
 		<local:MainWindowModel></local:MainWindowModel>
 	</Window.DataContext>
@@ -39,11 +39,24 @@
 
 		</CollectionViewSource>
 
-		<Rectangle x:Key="InputGenerator" Width="16" Height="16" Fill="LightGreen" ToolTip="Point Generator input" x:Shared="False"></Rectangle>
-		<Rectangle x:Key="InputAlgorithms" Width="16" Height="16" Fill="LightPink" ToolTip="Algorithms input" x:Shared="False"></Rectangle>
-		<Rectangle x:Key="OutputGraph" Width="16" Height="16" Fill="White" ToolTip="Output to graphic" x:Shared="False"></Rectangle>
-		<Rectangle x:Key="OutputLog" Width="16" Height="16" Fill="LightYellow" ToolTip="Output to the log" x:Shared="False"></Rectangle>
+		<Border x:Key="InputGenerator" Background="LightGreen" ToolTip="Point Generator input" BorderBrush="Black" BorderThickness="1" x:Shared="False" Margin="5,0,0,0">
+			<TextBlock FontSize="9" Margin="2">In</TextBlock>
+		</Border>
 
+		<Border x:Key="InputAlgorithms" Background="LightPink" ToolTip="Point Generator input" BorderBrush="Black" BorderThickness="1" x:Shared="False" Margin="5,0,0,0">
+			<TextBlock FontSize="9" Margin="2">In</TextBlock>
+		</Border>
+
+		<Border x:Key="OutputGraph" Background="White" ToolTip="Point Generator input" BorderBrush="Black" BorderThickness="1" x:Shared="False" Margin="5,0,0,0">
+			<TextBlock FontSize="9" Margin="2">Out</TextBlock>
+		</Border>
+
+		<Border x:Key="OutputLog" Background="LightYellow" ToolTip="Point Generator input" BorderBrush="Black" BorderThickness="1" x:Shared="False" Margin="5,0,0,0">
+			<TextBlock FontSize="9" Margin="2">Out</TextBlock>
+		</Border>
+
+		<TextBlock x:Key="Produce" Text=" >>>" x:Shared="False"></TextBlock>
+		
 	</Window.Resources>
 
 	<Grid>
@@ -202,7 +215,7 @@
 										<TextBlock Text="Speed test"></TextBlock>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
-										<TextBlock>>>></TextBlock>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource Produce}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
@@ -224,7 +237,7 @@
 										<TextBlock Text="Sample test"></TextBlock>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
-										<TextBlock>>>></TextBlock>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource Produce}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
@@ -247,7 +260,7 @@
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Check validity (with sets of tests)"></TextBlock>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
-										<TextBlock>>>></TextBlock>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource Produce}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 									</StackPanel>
@@ -267,7 +280,7 @@
 										<TextBlock Text="Side-by-side algorithm validity check"></TextBlock>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputGenerator}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
-										<TextBlock>>>></TextBlock>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource Produce}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputGraph}}"></ContentControl>
 									</StackPanel>
 								</GroupBox.Header>
@@ -289,7 +302,7 @@
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Deep performance test"></TextBlock>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource InputAlgorithms}}"></ContentControl>
-										<TextBlock>>>></TextBlock>
+										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource Produce}}"></ContentControl>
 										<ContentControl Content="{Binding Mode=OneWay, Source={StaticResource OutputLog}}"></ContentControl>
 										<Image Width="16" Height="16" Source="Images/Excel16.png" Margin="3,0,0,0"></Image>
 									</StackPanel>
@@ -334,7 +347,7 @@
 										</ListBox>
 
 										<TextBlock Margin="7,0,2,0">Max</TextBlock>
-										<ComboBox ItemsSource="{Binding CountOfInputPoints}" SelectedIndex="{Binding CountIndexSelected}" Width="90" ></ComboBox>
+                                        <ComboBox ItemsSource="{Binding CountOfInputPoints}" SelectedIndex="{Binding IndexOfLastInputPointsCount}" Width="90" ></ComboBox>
 									</WrapPanel>
 									<TextBlock FontStyle="Italic" TextWrapping="Wrap">Get millisec of each selected Convex Hull algorithms on each 'point generators' (multi selection in this group box). Each algo is tested on the same set of points once. Each test is made on an average of 10 times (10 x different set of values). Each batch of test is made on 10, 100, 1000, up to 50 000 000 points. Results in excel. It takes hours.</TextBlock>
 								</StackPanel>

@@ -33,7 +33,7 @@ namespace ConvexHullWorkbench
 		public MainWindow()
 		{
 			InitializeComponent();
-
+            
 			// ListBoxLog.Background = Brushes.LightYellow;
 
 			Model = DataContext as MainWindowModel;
