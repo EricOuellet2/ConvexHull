@@ -1,7 +1,5 @@
 # ConvexHull
-Code of OuelletConvexHull and its workbench for CodeProject article
-
-Code related to Code Project article: https://www.codeproject.com/Articles/1210225/Fast-and-improved-D-Convex-Hull-algorithm-and-its
+Code of OuelletConvexHull and its workbench for CodeProject article : Fast and improved 2D Convex Hull algorithm and its implementation in O(n log h). Link: https://www.codeproject.com/Articles/1210225/Fast-and-improved-D-Convex-Hull-algorithm-and-its
 
 It contains:
  - Many ConvexHull algorithm implementations
