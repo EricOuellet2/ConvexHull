@@ -55,7 +55,7 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexHeap = _algorithms.Count - 1;
 
-			_algorithms.Add(new Algorithm(AlgorithmType.ConvexHull, "MI ConvexHUll", "Delaunay and Voronoi, davecz", "Slow. From CodePlex. Could do 3D.", OxyPlot.OxyColors.Indigo,
+			_algorithms.Add(new Algorithm(AlgorithmType.ConvexHull, "MI ConvexHUll (Delaunay/Voronoi)", "Delaunay and Voronoi, davecz", "Slow. From CodePlex. Could do 3D.", OxyPlot.OxyColors.Indigo,
 				(points, algorithmStat) =>
 				{
 					var vertices = new Vertex[points.Length];
