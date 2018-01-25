@@ -12,7 +12,10 @@ namespace ConvexHullWorkbench
 		[Description("Convex Hull")]
 		ConvexHull = 1,
 
+		[Description("Convex Hull Online")]
+		ConvexHullOnline = 2,
+
 		[Description("Smallest Enclosing Circle")]
-		SmallestEnclosingCircle = 2
+		SmallestEnclosingCircle = 3
 	}
 }

@@ -11,6 +11,12 @@ namespace General.AvlTreeSet
 	/// <summary>
 	/// 2016-12-08, Eric Ouellet
 	/// The code is an adapted version of BitLush AvlTree: https://bitlush.com/blog/efficient-avl-tree-in-c-sharp
+	/// 
+	/// Rule for property "balance":
+	///		The balance is the difference of the sum of childs count on each side of the node. 
+	///			- It is -1 if the right side has +1 node than left one.
+	///			- It is +1 if the left side has +1 node then right side.
+	///			- A diff of 2 require a rebalance, there should'nt be any abs(balance) >= 2 
 	/// </summary>
 	public class AvlTreeSet<T> : IEnumerable<T>, IEnumerable, ICollection<T>, ICollection, IReadOnlyCollection<T> // ISet<T>
 	{
@@ -19,7 +25,7 @@ namespace General.AvlTreeSet
 		private AvlNode<T> _root;
 		protected int _count = 0;
 
-		public string Name { get; protected set; } 
+		public string Name { get; protected set; }
 
 		// ******************************************************************
 		public AvlTreeSet(IComparer<T> comparer)
@@ -38,10 +44,7 @@ namespace General.AvlTreeSet
 		// ******************************************************************
 		public AvlNode<T> Root
 		{
-			get
-			{
-				return _root;
-			}
+			get { return _root; }
 		}
 
 		// ******************************************************************
@@ -52,6 +55,7 @@ namespace General.AvlTreeSet
 
 		// ******************************************************************
 		private object _syncRoot;
+
 		public object SyncRoot
 		{
 			get
@@ -147,7 +151,7 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
-		public virtual bool Add(T item)
+		public virtual AvlNode<T> Add(T item)
 		{
 			AvlNode<T> node = _root;
 
@@ -161,9 +165,10 @@ namespace General.AvlTreeSet
 
 					if (left == null)
 					{
-						node.Left = new AvlNode<T> { Item = item, Parent = node };
+						AvlNode<T> newNode = new AvlNode<T> { Item = item, Parent = node };
+						node.Left = newNode;
 						AddBalance(node, 1);
-						return true;
+						return newNode;
 					}
 					else
 					{
@@ -176,9 +181,10 @@ namespace General.AvlTreeSet
 
 					if (right == null)
 					{
-						node.Right = new AvlNode<T> { Item = item, Parent = node };
+						AvlNode<T> newNode = new AvlNode<T> { Item = item, Parent = node };
+						node.Right = newNode;
 						AddBalance(node, -1);
-						return true;
+						return newNode;
 					}
 					else
 					{
@@ -187,14 +193,72 @@ namespace General.AvlTreeSet
 				}
 				else
 				{
-					return false;
+					return null;
 				}
 			}
 
 			_root = new AvlNode<T> { Item = item };
 			_count++;
 
-			return true;
+			DebugEnsureTreeIsValid();
+
+			return _root;
+		}
+
+		// ******************************************************************
+		public virtual AvlNode<T> AddOrUpdate(T item)
+		{
+			AvlNode<T> node = _root;
+
+			while (node != null)
+			{
+				int compare = _comparer.Compare(item, node.Item);
+
+				if (compare < 0)
+				{
+					AvlNode<T> left = node.Left;
+
+					if (left == null)
+					{
+						AvlNode<T> newNode = new AvlNode<T> { Item = item, Parent = node };
+						node.Left = newNode;
+						AddBalance(node, 1);
+						return newNode;
+					}
+					else
+					{
+						node = left;
+					}
+				}
+				else if (compare > 0)
+				{
+					AvlNode<T> right = node.Right;
+
+					if (right == null)
+					{
+						AvlNode<T> newNode = new AvlNode<T> { Item = item, Parent = node };
+						node.Right = newNode;
+						AddBalance(node, -1);
+						return newNode;
+					}
+					else
+					{
+						node = right;
+					}
+				}
+				else
+				{
+					node.Item = item;
+					return node;
+				}
+			}
+
+			_root = new AvlNode<T> { Item = item };
+			_count++;
+
+			DebugEnsureTreeIsValid();
+
+			return _root;
 		}
 
 		// ******************************************************************
@@ -472,11 +536,13 @@ namespace General.AvlTreeSet
 				}
 			}
 
+			DebugEnsureTreeIsValid();
+
 			return false;
 		}
 
 		// ******************************************************************
-		protected void RemoveNode(AvlNode<T> node)
+		public void RemoveNode(AvlNode<T> node)
 		{
 			_count--;
 
@@ -507,8 +573,8 @@ namespace General.AvlTreeSet
 						}
 						else
 						{
-							Dump2();
-							Debug.Assert(false);  // Duplicate values ???
+							DumpVisual2();
+							Debug.Assert(false); // Duplicate values ???
 						}
 					}
 				}
@@ -609,6 +675,8 @@ namespace General.AvlTreeSet
 					RemoveBalance(successorParent, -1);
 				}
 			}
+
+			DebugEnsureTreeIsValid();
 		}
 
 		// ******************************************************************
@@ -672,6 +740,97 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
+		/// <summary>
+		/// EO: Rebalance any node wich has become unbalanced.
+		/// Could be called from a node with a newly added child or a parent of a newly deleted node.
+		/// It will rebalance the tree up the root without being recursive (it will be done iteratively for better performance)
+		/// </summary>
+		/// <param name="node">Newly unbalanced node</param>
+		protected void BalanceTree(AvlNode<T> node) // nodeWhichRequireRecalcOfBalance)
+		{
+			while (node != null)
+			{
+				int balance;
+				if (node.Left == null)
+				{
+					if (node.Right == null)
+					{
+						balance = 0;
+					}
+					else
+					{
+						balance = 1 + node.Right.Balance;
+					}
+				}
+				else
+				{
+					if (node.Right == null)
+					{
+						balance = -1 + node.Left.Balance;
+					}
+					else
+					{
+						balance = node.Left.Balance -  node.Right.Balance;
+					}
+				}
+				
+				if (balance == 2)
+				{
+					if (node.Left.Balance >= 0)
+					{
+						node = RotateRight(node);
+
+						if (node.Balance == -1)
+						{
+							return;
+						}
+					}
+					else
+					{
+						node = RotateLeftRight(node);
+					}
+				}
+				else if (balance == -2)
+				{
+					if (node.Right.Balance <= 0)
+					{
+						node = RotateLeft(node);
+
+						if (node.Balance == 1)
+						{
+							return;
+						}
+					}
+					else
+					{
+						node = RotateRightLeft(node);
+					}
+				}
+				else
+				{
+					node.Balance = balance;
+				}
+
+				node = node.Parent;
+			}
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// WARNING THIS METHOD is modifying the node content. 
+		/// This weird behavior cause side effect which could invalid any node previously referenced.
+		/// This method is used to remove node.
+		/// 
+		/// - THE BIG QUESTION is: Should I be able to obtain a ref on the node or not (like I added for remove nmode)??? 
+		/// - My answer is "NO" theoritically but in real life I say "YES" I want a ref in order to be more efficient in my context.
+		/// - I know that this could affect the Tree implementtion abstraction which could be prevented to change in the future 
+		/// because I play with inner stuff but honestly, for performance here, I  don't give a shit.
+		/// 
+		/// But could I replace node without touching the item? I should be able. It cost a little more thought :-)
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="source"></param>
+
 		private static void Replace(AvlNode<T> target, AvlNode<T> source)
 		{
 			AvlNode<T> left = source.Left;
@@ -690,6 +849,195 @@ namespace General.AvlTreeSet
 			if (right != null)
 			{
 				right.Parent = target;
+			}
+		}
+
+		// ******************************************************************
+		// No side effect on any node previously referenced, other than the deleted one and/or root if deleted node is the root
+		public virtual bool RemoveSafe(T item)
+		{
+			AvlNode<T> node = _root;
+
+			while (node != null)
+			{
+				if (_comparer.Compare(item, node.Item) < 0)
+				{
+					node = node.Left;
+				}
+				else if (_comparer.Compare(item, node.Item) > 0)
+				{
+					node = node.Right;
+				}
+				else
+				{
+					RemoveNodeSafe(node);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		// ******************************************************************
+		// No side effect on any node previously referenced, other than the deleted one and/or root if deleted node is the root
+		public void RemoveNodeSafe(AvlNode<T> node)
+		{
+			_count--;
+
+			AvlNode<T> left = node.Left;
+			AvlNode<T> right = node.Right;
+
+			if (left == null)
+			{
+				if (right == null)
+				{
+					if (node == _root)
+					{
+						_root = null;
+					}
+					else
+					{
+						if (node.Parent.Left == node)
+						{
+							node.Parent.Left = null;
+
+							RemoveBalance(node.Parent, -1);
+						}
+						else if (node.Parent.Right == node)
+						{
+							node.Parent.Right = null;
+
+							RemoveBalance(node.Parent, 1);
+						}
+						else
+						{
+							DumpVisual2();
+							Debug.Assert(false); // Duplicate values ???
+						}
+					}
+				}
+				else
+				{
+					ReplaceSafe(node, right);
+					RemoveBalance(right, 0);
+
+				}
+			}
+			else if (right == null)
+			{
+				ReplaceSafe(node, left);
+				RemoveBalance(left, 0);
+			}
+			else
+			{
+				AvlNode<T> successor = right;
+
+				if (successor.Left == null)
+				{
+					AvlNode<T> parent = node.Parent;
+
+					successor.Parent = parent;
+					successor.Left = left;
+					successor.Balance = node.Balance;
+
+					left.Parent = successor;
+
+					if (node == _root)
+					{
+						_root = successor;
+					}
+					else
+					{
+						if (parent.Left == node)
+						{
+							parent.Left = successor;
+						}
+						else
+						{
+							parent.Right = successor;
+						}
+					}
+
+					RemoveBalance(successor, 1);
+				}
+				else
+				{
+					while (successor.Left != null)
+					{
+						successor = successor.Left;
+					}
+
+					AvlNode<T> parent = node.Parent;
+					AvlNode<T> successorParent = successor.Parent;
+					AvlNode<T> successorRight = successor.Right;
+
+					if (successorParent.Left == successor)
+					{
+						successorParent.Left = successorRight;
+					}
+					else
+					{
+						successorParent.Right = successorRight;
+					}
+
+					if (successorRight != null)
+					{
+						successorRight.Parent = successorParent;
+					}
+
+					successor.Parent = parent;
+					successor.Left = left;
+					successor.Balance = node.Balance;
+					successor.Right = right;
+					right.Parent = successor;
+
+					left.Parent = successor;
+
+					if (node == _root)
+					{
+						_root = successor;
+					}
+					else
+					{
+						if (parent.Left == node)
+						{
+							parent.Left = successor;
+						}
+						else
+						{
+							parent.Right = successor;
+						}
+					}
+
+					RemoveBalance(successorParent, -1);
+				}
+			}
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// EO: New
+		/// </summary>
+		/// <param name="itemToDelete"></param>
+		/// <param name="child"></param>
+
+		private void ReplaceSafe(AvlNode<T> itemToDelete, AvlNode<T> child)
+		{
+			child.Parent = itemToDelete.Parent;
+			if (itemToDelete.Parent != null)
+			{
+				if (itemToDelete.Parent.Left == itemToDelete)
+				{
+					itemToDelete.Parent.Left = child;
+				}
+				else if (itemToDelete.Parent.Right == itemToDelete)
+				{
+					itemToDelete.Parent.Right = child;
+				}
+			}
+			else
+			{
+				_root = child;
 			}
 		}
 
@@ -758,9 +1106,14 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
-		public void Dump()
+		/// <summary>
+		/// Simple dump of each node, one by line
+		/// </summary>
+		public virtual void Dump()
 		{
 			StringBuilder sb = new StringBuilder();
+
+			sb.AppendLine($"AvlTree dump of '{Name}', First: {GetFirstNode()}, Last: {GetLastNode()}");
 
 			bool isFirst = true;
 			foreach (var pt in this)
@@ -783,13 +1136,22 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
-		public virtual void Dump2(string prefix = "", string title = "")
+		/// <summary>
+		/// This dump the tree in a more visual and easy way to see. Where each item is tabbed according to its depth.
+		/// Each line is an item. The first line is the first item and so on. 
+		/// If you look on the side, the tree will look like reverse. I prefer using DumpVisual.
+		/// </summary>
+		/// <param name="prefix"></param>
+		/// <param name="title"></param>
+		public virtual void DumpVisual2(string prefix = "", string title = "")
 		{
+			VerifyIntegrity();
+
 			Debug.Print($"{prefix}---------------------------- AVL Tree Dump {title} -------------------------------");
 			Debug.Print($"Count: {Count}, First: {GetFirstItem()}, Last: {GetLastItem()}, DebugCount: {DebugCount()}");
 
 			StringBuilder sb = new StringBuilder();
-			foreach (var node in NodesReverse())
+			foreach (var node in Nodes())
 			{
 				sb.Clear();
 				sb.Append(prefix);
@@ -799,6 +1161,34 @@ namespace General.AvlTreeSet
 				}
 				sb.Append(node);
 				Debug.Print(sb.ToString());
+			}
+		}
+
+		// ******************************************************************
+		[DebuggerHidden]
+		public void VerifyIntegrity()
+		{
+			if (this.Root != null)
+			{
+				Debug.Assert(Root.Parent == null);
+				VerifyNodeIntegrityRecursive(Root);
+			}
+		}
+
+		// ******************************************************************
+		[DebuggerHidden]
+		private void VerifyNodeIntegrityRecursive(AvlNode<T> node)
+		{
+			if (node.Left != null)
+			{
+				Debug.Assert(node.Left.Parent == node);
+				VerifyNodeIntegrityRecursive(node.Left);
+			}
+
+			if (node.Right != null)
+			{
+				Debug.Assert(node.Right.Parent == node);
+				VerifyNodeIntegrityRecursive(node.Right);
 			}
 		}
 
@@ -890,9 +1280,10 @@ namespace General.AvlTreeSet
 		{
 			CopyTo(array as T[], index, Count);
 		}
-		
+
 		// ******************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		public void DebugEnsureTreeIsValid()
 		{
 			Debug.Assert(Count == DebugCount());
@@ -903,6 +1294,7 @@ namespace General.AvlTreeSet
 
 		// ******************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		private void DebugEnsureProperParentRecursive(AvlNode<T> node)
 		{
 			if (node.Left != null)
@@ -920,6 +1312,7 @@ namespace General.AvlTreeSet
 
 		// ******************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		public void DebugEnsureProperBalance()
 		{
 			RecursiveEnsureNodeBalanceIsValid(Root);
@@ -927,6 +1320,7 @@ namespace General.AvlTreeSet
 
 		// ******************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		private void RecursiveEnsureNodeBalanceIsValid(AvlNode<T> node)
 		{
 			int leftHeight = RecursiveGetChildMaxHeight(node.Left);
@@ -968,17 +1362,20 @@ namespace General.AvlTreeSet
 
 		// ************************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		private void DumpIfNotTrue(bool assertion)
 		{
 			if (!assertion)
 			{
-				Dump2();
+				DumpVisual2();
+				DumpVisual();
 				Debug.Assert(false);
 			}
 		}
 
 		// ******************************************************************
 		[System.Diagnostics.Conditional("DEBUG")]
+		[DebuggerHidden]
 		public void DebugEnsureTreeIsSorted()
 		{
 			var enumerator = this.GetEnumerator();
@@ -1023,5 +1420,144 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
+		public void CopyTo(AvlTreeSet<T> avlTree)
+		{
+			avlTree.Name = this.Name;
+			avlTree._comparer = this._comparer;
+			avlTree._count = this._count;
+			avlTree._root = CopyTreeRecursive(_root, null);
+		}
+
+		// ******************************************************************
+		private AvlNode<T> CopyTreeRecursive(AvlNode<T> source, AvlNode<T> copyParent)
+		{
+			if (source == null)
+			{
+				return null;
+			}
+
+			AvlNode<T> copy = new AvlNode<T>();
+			copy.Parent = copyParent;
+			copy.Item = source.Item;
+			copy.Balance = source.Balance;
+			copy.Left = CopyTreeRecursive(source.Left, copy);
+			copy.Right = CopyTreeRecursive(source.Right, copy);
+
+			return copy;
+		}
+
+		// ******************************************************************
+		public override bool Equals(object obj)
+		{
+			if (obj == null)
+			{
+				return false;
+			}
+
+			var avlTree = obj as AvlTreeSet<T>;
+
+			if (avlTree == null)
+			{
+				return false;
+			}
+
+			if (this.Count != avlTree.Count || this.Name != avlTree.Name)
+			{
+				return false;
+			}
+
+			using (var enumThis = this.GetEnumerator())
+			{
+				using (var enumObj = avlTree.GetEnumerator())
+				{
+					enumThis.Reset();
+					enumObj.Reset();
+
+					for (; ; )
+					{
+						bool thisMoveNextResult = enumThis.MoveNext();
+						bool objMoveNextResult = enumObj.MoveNext();
+						if (thisMoveNextResult != objMoveNextResult)
+						{
+							return false;
+						}
+
+						if (thisMoveNextResult == false)
+						{
+							break;
+						}
+
+						if (! object.Equals(enumThis.Current, enumObj.Current))
+						{
+							return false;
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+		// ************************************************************************
+		private int GetMaxLevel()
+		{
+			return GetMaxLevelRecursive(Root);
+		}
+
+		// ************************************************************************
+		private int GetMaxLevelRecursive(AvlNode<T> node)
+		{
+			if (node == null)
+			{
+				return 0;
+			}
+
+			return 1 + Math.Max(GetMaxLevelRecursive(node.Left), GetMaxLevelRecursive(node.Right));
+		}
+
+		// ************************************************************************
+		/// This dump the tree in a more visual and easy way to see. Where each item is tabbed according to its depth.
+		/// Each line is an item. The first line is the last item and so on. 
+		/// If you look on the side, the tree will look like normal. I prefer using this one instead of DumpVisual2.
+		public void DumpVisual(string title = null)
+		{
+			if (title == null)
+			{
+				title = Name;
+			}
+
+			// int maxLevel = GetMaxLevel();
+			int itemWidth = 5;
+
+			AvlNode<T> node = GetLastNode();
+
+			Debug.Print($">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Tree Visual Dump Start '{title}' (First node is at the bottom and last node just below this line)");
+
+			if (Count > 256)
+			{
+				Debug.Print("Too much items (>256)...");
+			}
+			else
+			{
+				while (node != null)
+				{
+					int nodeHeight = node.GetHeight() * itemWidth;
+					Debug.Print($"{new string(' ', nodeHeight)}{node.Item}({node.Balance})");
+					node = node.GetPreviousNode();
+				}
+			}
+			Debug.Print($">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Tree Visual Dump End '{title}'");
+
+		}
+
+		// ************************************************************************
+		public override string ToString()
+		{
+			return $"AvlTreeSet of {typeof(T).Name}. Count = {Count}";
+		}
+
+		// ************************************************************************
+
 	}
 }
+

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using General.AvlTreeSet;
 
-namespace OuelletConvexHullAvl2
+namespace OuelletConvexHullAvl2Online
 {
 	public abstract class Quadrant : AvlTreeSet<Point>
 	{
@@ -28,6 +29,12 @@ namespace OuelletConvexHullAvl2
 		public Quadrant(IReadOnlyList<Point> listOfPoint, IComparer<Point> comparer) : base(comparer)
 		{
 			ListOfPoint = listOfPoint;
+		}
+
+		// ************************************************************************
+		protected Quadrant()
+		{
+			
 		}
 
 		// ************************************************************************
@@ -93,8 +100,11 @@ namespace OuelletConvexHullAvl2
 		/// Called after insertion in order to see if the newly added point invalidate one 
 		/// or more neighbors and if so, remove it/them from the tree.
 		/// </summary>
+		/// <param name="pointPrevious">The previous point if you want to go that direction</param>
+		/// <param name="pointNew">The new inserted point</param>
+		/// <param name="pointNext">The next point if you wan tto go that direction</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected void InvalidateNeighbors(AvlNode<Point> pointPrevious, AvlNode<Point> pointNew, AvlNode<Point> pointNext)
+		internal void InvalidateNeighbors(AvlNode<Point> pointPrevious, AvlNode<Point> pointNew, AvlNode<Point> pointNext)
 		{
 			bool invalidPoint;
 
@@ -148,11 +158,70 @@ namespace OuelletConvexHullAvl2
 		}
 
 		// ************************************************************************
+		public abstract Quadrant Clone();
+		
+		// ************************************************************************
+		public void CopyTo(Quadrant q)
+		{
+			base.CopyTo(q);
+			q.FirstPoint = this.FirstPoint;
+			q.CurrentNode = this.CurrentNode;
+			q.LastPoint = this.LastPoint;
+			q.RootPoint = this.RootPoint;
+			q.ListOfPoint = this.ListOfPoint;
+		}
+
+		// ************************************************************************
 		public void Dump2(string prefix = null)
 		{
 			Debug.Print($"-------------------- Quadrant Dump of {Name}");
 			Debug.Print($"FirstPoint: {FirstPoint}, LastPoint: {LastPoint}, Root: {RootPoint}");
 			base.DumpVisual2(prefix, Name);
+		}
+
+		// ************************************************************************
+		public override bool Equals(object obj)
+		{
+			if (obj == null)
+			{
+				return false;
+			}
+
+			var q = obj as Quadrant;
+			if (q == null)
+			{
+				return false;
+			}
+
+			if (FirstPoint != q.FirstPoint || LastPoint != q.LastPoint || RootPoint != q.RootPoint)
+			{
+				return false;
+			}
+
+			if (this.ListOfPoint != q.ListOfPoint)
+			{
+				return false;
+			}
+			
+			if (!base.Equals(q))
+			{
+				return false;
+			}
+			
+			return true;
+		}
+
+		// ************************************************************************
+		public override void Dump()
+		{
+			Debug.Print($"Quadrant dump: {Name}, FirstPoint: {FirstPoint}, LastPoint: {LastPoint}");
+			base.Dump();
+		}
+
+		// ************************************************************************
+		public void DumpVisual()
+		{
+			base.DumpVisual(Name);	
 		}
 
 		// ************************************************************************

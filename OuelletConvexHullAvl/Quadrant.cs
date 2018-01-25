@@ -159,7 +159,7 @@ namespace OuelletConvexHullAvl
 		{
 			Debug.Print($"-------------------- Quadrant Dump of {Name}");
 			Debug.Print($"FirstPoint: {FirstPoint}, LastPoint: {LastPoint}, Root: {RootPoint}");
-			base.Dump2(prefix, Name);
+			base.DumpVisual2(prefix, Name);
 		}
 
 		// ************************************************************************

@@ -135,22 +135,24 @@ namespace ConvexHullWorkbench
 
 			IsCountOfPointRandom = true;
 
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexChan].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexLiuAndChen].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexChan].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexLiuAndChen].IsSelected = true;
 
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThread].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArray].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayMemCpy].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayImmu].IsSelected = true;
-			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayMemCpyNoIndirect].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThread].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArray].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayMemCpy].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayImmu].IsSelected = true;
+			////AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayMemCpyNoIndirect].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl].IsSelected = true;
+//			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2].IsSelected = true;
 
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2].IsSelected = true;
+//			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2Online].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineUse].IsSelected = true;
 
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHull4Threads].IsSelected = true;
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullMultiThreads].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHull4Threads].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullMultiThreads].IsSelected = true;
 
-			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullCpp].IsSelected = true;
+			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullCpp].IsSelected = true;
 		}
 
 		// ******************************************************************
@@ -264,8 +266,11 @@ namespace ConvexHullWorkbench
 			}
 		}
 
+		// ******************************************************************
 		private Point[] _points;
 		private int _countOfTest = 100;
+
+		public Point[] Points => _points;
 
 		// ******************************************************************
 		public void GeneratePoints()
@@ -319,7 +324,15 @@ namespace ConvexHullWorkbench
 			{
 				var series = new LineSeries { Title = algo.Name, MarkerType = MarkerType.Square, MarkerFill = algo.Color };
 
-				var points = algo.GetHull(_points, null);
+				var algoStd = algo as AlgorithmStandard;
+				if (algoStd == null)
+				{
+					throw new System.ArgumentException("The algorithm is not a Standard Convex Hull algorithm.");
+				}
+
+				var points = algoStd.Calc(_points, null);
+
+				Debug.Assert(points != null);
 
 				AddMessage($"Adding {points.Length} convex hull points in OxyPlot started.");
 
@@ -410,7 +423,15 @@ namespace ConvexHullWorkbench
 
 						AlgorithmStat stat = new AlgorithmStat();
 						Stopwatch stopwatch = Stopwatch.StartNew();
-						var result = algo.GetHull(_points, stat);
+
+						IReadOnlyList<Point> result;
+						var algoStd = algo as AlgorithmStandard;
+						if (algoStd == null)
+						{
+							throw new InvalidOperationException($"Stats can only be acheived on '{nameof(AlgorithmStandard)}'.");
+						}
+						result = algoStd?.Calc(_points, stat);
+
 						stopwatch.Stop();
 
 						if (Global.IsCancel)
@@ -422,7 +443,7 @@ namespace ConvexHullWorkbench
 
 						stat.TimeSpanCSharp = stopwatch.Elapsed; //  TimeSpan.FromTicks(stopwatch.ElapsedTicks);
 						stat.PointCount = _points.Length;
-						stat.ResultCount = result.Length;
+						stat.ResultCount = result.Count;
 
 						Application.Current.Dispatcher.BeginInvoke(new Action(() =>
 						{
@@ -620,7 +641,34 @@ namespace ConvexHullWorkbench
 					{
 						AddMessage("Testing algorithm: " + algo.Name);
 
-						Func<Point[], Point[]> funcConvexHull = (points) => algo.GetHull(points, null);
+						Func<Point[], IReadOnlyList<Point>> funcConvexHull = null;
+						var algoStd = algo as AlgorithmStandard;
+						if (algo != null)
+						{
+							funcConvexHull = (points) => algoStd.Calc(points, null);
+						}
+						else
+						{
+							var algoOnline = algo as AlgorithmOnline;
+							if (algo != null)
+							{
+								funcConvexHull = (Points) =>
+								{
+									algoOnline.Init();
+									foreach (var pt in Points)
+									{
+										algoOnline.AddPoint(pt);
+									}
+
+									return algoOnline.GetResult();
+								};
+							}
+						}
+
+						if (funcConvexHull == null)
+						{
+							throw new System.InvalidOperationException("Unable to get an appropriate 'Convex Hull Func'.");
+						}
 
 						ConvexHullTests tests = new ConvexHullTests(algo.Name, funcConvexHull, funcShouldStopTesting);
 						tests.TestSpecialCases();
@@ -641,6 +689,7 @@ namespace ConvexHullWorkbench
 			Global.Instance.Iteration = 0;
 
 			Algorithm algoRef = AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThread];
+			var algoRefStd = algoRef as AlgorithmStandard;
 
 			if (algorithms.Count == 0)
 			{
@@ -658,7 +707,7 @@ namespace ConvexHullWorkbench
 
 					GeneratePoints();
 
-					var refPoints = algoRef.GetHull(_points, null);
+					var refPoints = algoRefStd?.Calc(_points, null);
 
 					foreach (var algo in algorithms.Where(a => a.AlgorithmType == AlgorithmType.ConvexHull && a.IsSelected).ToList())
 					{
@@ -669,7 +718,8 @@ namespace ConvexHullWorkbench
 							return;
 						}
 
-						DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(algo.Name, _points, refPoints, algo.GetHull(_points, null));
+						var algoStd = algo as AlgorithmStandard;
+						DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(algo.Name, _points, refPoints, algoStd.Calc(_points, null));
 
 						if (diffs.HasErrors)
 						{
@@ -752,6 +802,12 @@ namespace ConvexHullWorkbench
 		}
 
 		// ******************************************************************
+		/// <summary>
+		/// Performance test. Test selected algorithms with the same set of random points.
+		/// Each of these test for a count of points is performed many time in order to get a good normalization (good average) of time taken.
+		/// Results are shown in excel
+		/// </summary>
+		/// <param name="path"></param>
 		public void TestForArticle(string path)
 		{
 			var wb = new XLWorkbook();
@@ -763,7 +819,7 @@ namespace ConvexHullWorkbench
 			int countOfSimulationWhereTheAverageIsDone = 10; // more representative average result
 
 			var pointGenerators = PointGeneratorManager.Generators.Where(g => g.IsSelected).ToList();
-			
+
 			//pointGenerators.Clear();
 			//pointGenerators.Add(PointGeneratorManager.Generators[4]);
 
@@ -806,13 +862,15 @@ namespace ConvexHullWorkbench
 
 						foreach (var algo in algos)
 						{
+							var algoStd = algo as AlgorithmStandard;
+
 							AddMessage($"Input points: {CountOfInputPoints[countOfInputPointsIndex]}, Test: {countOfSimulationWhereTheAverageIsDoneIndex + 1}, Algo: {algo.Name}, Generator: {pointGenerator.Name}");
 
 							var algoStat = new AlgorithmStat();
 							Stopwatch stopWatch = new Stopwatch();
 							stopWatch.Start();
 
-							Point[] result = algo.GetHull(points, algoStat);
+							Point[] result = algoStd?.Calc(points, algoStat);
 
 							stopWatch.Stop();
 							algoStat.TimeSpanCSharp = stopWatch.Elapsed;
@@ -831,12 +889,12 @@ namespace ConvexHullWorkbench
 
 			var listOfMinTimePerLine = new double[CountOfInputPoints.Length];
 
-            for (pointGeneratorIndex = 0; pointGeneratorIndex < pointGenerators.Count; pointGeneratorIndex++)
-            {
-            	ws.Cell(row++, dataStartCol - 1).Value = $"{pointGenerators[pointGeneratorIndex].Name} generator";
+			for (pointGeneratorIndex = 0; pointGeneratorIndex < pointGenerators.Count; pointGeneratorIndex++)
+			{
+				ws.Cell(row++, dataStartCol - 1).Value = $"{pointGenerators[pointGeneratorIndex].Name} generator";
 
-                    // Start: Header and also Ensure everything is properly loaded in memory
-                ws.Cell(row, dataStartCol - 1).Value = "Points";
+				// Start: Header and also Ensure everything is properly loaded in memory
+				ws.Cell(row, dataStartCol - 1).Value = "Points";
 				algoIndex = 0;
 				foreach (var algo in algos)
 				{
@@ -927,7 +985,7 @@ namespace ConvexHullWorkbench
 		}
 
 		// ******************************************************************
-		
+
 
 
 	}

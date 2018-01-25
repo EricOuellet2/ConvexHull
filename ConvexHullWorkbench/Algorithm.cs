@@ -14,8 +14,6 @@ namespace ConvexHullWorkbench
 		public string Comment { get; private set; }
 		public OxyPlot.OxyColor Color { get; private set; }
 
-		public Func<Point[], AlgorithmStat, Point[]> GetHull { get; private set; }
-
 		public bool IsSelected
 		{
 			get { return _isSelected; }
@@ -36,14 +34,13 @@ namespace ConvexHullWorkbench
 		/// <param name="author"></param>
 		/// <param name="comment"></param>
 		/// <param name="getHull">The func receive the points and an optional AlgorithmStat which could be null.</param>
-		public Algorithm(AlgorithmType algorithmType, string name, string author, string comment, OxyPlot.OxyColor color, Func<Point[], AlgorithmStat, Point[]> getHull)
+		public Algorithm(AlgorithmType algorithmType, string name, string author, string comment, OxyPlot.OxyColor color)
 		{
 			AlgorithmType = algorithmType;
 			Name = name;
 			Author = author;
 			Comment = comment;
 			Color = color;
-			GetHull = getHull;
 		}
 		// ************************************************************************
 		public override string ToString()

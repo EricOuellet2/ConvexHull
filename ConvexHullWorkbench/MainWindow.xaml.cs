@@ -19,8 +19,16 @@ using DocumentFormat.OpenXml.Office2013.PowerPoint;
 using OxyPlot;
 using General;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Windows.Threading;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using OuelletConvexHullArray;
+using OuelletConvexHullAvl2Online;
+using OxyPlot.Series;
+//using OxyPlot.Series;
 using Unsafe;
+using Point = System.Windows.Point;
 
 namespace ConvexHullWorkbench
 {
@@ -33,7 +41,7 @@ namespace ConvexHullWorkbench
 		public MainWindow()
 		{
 			InitializeComponent();
-            
+
 			// ListBoxLog.Background = Brushes.LightYellow;
 
 			Model = DataContext as MainWindowModel;
@@ -310,7 +318,7 @@ namespace ConvexHullWorkbench
 
 			PointArrayUtilUnsafe.RemoveRange(ref b, 3, 2, ref count);
 			DebugUtil.Print(b);
-			Debug.Assert(b.EqualsEx(new Point[] { new Point(0, 0), new Point(1, 1), new Point(2, 2)}, count));
+			Debug.Assert(b.EqualsEx(new Point[] { new Point(0, 0), new Point(1, 1), new Point(2, 2) }, count));
 			Debug.Assert(count == 3);
 
 
@@ -456,7 +464,7 @@ namespace ConvexHullWorkbench
 
 			for (int n = 1; n < 1000000000; n++)
 			{
-				if(b1Count == 0)
+				if (b1Count == 0)
 				{
 					insert = true;
 				}
@@ -469,7 +477,7 @@ namespace ConvexHullWorkbench
 				{
 					index = (int)(rnd.NextDouble() * (b1Count + 1));
 
-					var p =new Point(rnd.NextDouble(), rnd.NextDouble());
+					var p = new Point(rnd.NextDouble(), rnd.NextDouble());
 
 					ArrayUtil.InsertItem(ref b1, p, index, ref b1Count);
 					b2 = ArrayUtil.ImmutableInsertItem(b2, p, index);
@@ -481,7 +489,7 @@ namespace ConvexHullWorkbench
 					index = (int)(rnd.NextDouble() * (b1Count - countOfItemToRemove));
 					index = Math.Min(index, b1Count - 1);
 
-					countOfItemToRemove = Math.Min(countOfItemToRemove, b1Count - index -1);
+					countOfItemToRemove = Math.Min(countOfItemToRemove, b1Count - index - 1);
 
 					ArrayUtil.RemoveRange(ref b1, index, countOfItemToRemove, ref b1Count);
 					b2 = ArrayUtil.ImmutableRemoveRange(b2, index, countOfItemToRemove);
@@ -498,7 +506,7 @@ namespace ConvexHullWorkbench
 		// ******************************************************************
 		private void ButtonClearAllClick(object sender, RoutedEventArgs e)
 		{
-			foreach(var algo in Model.AlgorithmManager.Algorithms)
+			foreach (var algo in Model.AlgorithmManager.Algorithms)
 			{
 				algo.IsSelected = false;
 			}
@@ -521,6 +529,240 @@ namespace ConvexHullWorkbench
 		}
 
 		// ******************************************************************
+		private void TestOnlineConvexHull(object sender, RoutedEventArgs e)
+		{
+			AlgorithmOnline _algoOnlineSelected = null;
+			int count = 0;
 
+			foreach (var algo in Model.AlgorithmManager.Algorithms)
+			{
+				if (algo.AlgorithmType == AlgorithmType.ConvexHullOnline)
+				{
+					_algoOnlineSelected = algo as AlgorithmOnline;
+					count++;
+				}
+			}
+
+			if (count != 1 || _algoOnlineSelected == null)
+			{
+				MessageBox.Show("You should select one and only one Convex Hull Online algorithm");
+				return;
+			}
+
+			Model.GeneratePoints();
+
+			var algoOnlineStat = new AlgorithmStat();
+
+			Model.PlotModel.Series.Clear();
+			var oxyPlotSeries = new LineSeries { Title = _algoOnlineSelected.Name, MarkerType = MarkerType.Square, MarkerFill = _algoOnlineSelected.Color };
+
+			// ici manque les points dans la series
+
+			Model.PlotModel.Series.Insert(0, oxyPlotSeries);
+
+			Model.AddMessage($"Starting online test.");
+
+			_algoOnlineSelected.Init();
+
+			AddAnotherPointAsync(_algoOnlineSelected, algoOnlineStat, 0, oxyPlotSeries);
+		}
+
+		// ******************************************************************
+		private void ProcessNextAlgorithmOnlinePoint(AlgorithmOnline algoOnline, AlgorithmStat algoOnlineStat, int index, LineSeries oxyPlotSeries)
+		{
+			if (index < 0 || index >= Model.Points.Length)
+			{
+				Model.AddMessage($"Online test completed. {index} points processed.");
+				return;
+			}
+
+			Point pt = Model.Points[index];
+			index++;
+
+			Model.Iteration = index;
+
+			if (algoOnline.AddPoint(pt))
+			{
+				oxyPlotSeries.Points.Clear();
+
+				IReadOnlyCollection<Point> results = algoOnline.GetResult();
+
+				algoOnline.Stat.PointCount = index;
+				algoOnline.Stat.ResultCount = results.Count;
+
+				if (results.Count > 0)
+				{
+					foreach (var point in results)
+					{
+						oxyPlotSeries.Points.Add(new DataPoint(point.X, point.Y));
+					}
+				}
+
+				Model.PlotModel.PlotView?.InvalidatePlot();
+			}
+
+
+			if (Global.Instance.IsCancel)
+			{
+				Model.AddMessage("Convex Hull Online test canceled");
+				Global.Instance.ResetCancel();
+				return;
+			}
+
+			AddAnotherPointAsync(algoOnline, algoOnlineStat, index, oxyPlotSeries);
+		}
+
+		// ******************************************************************
+		void AddAnotherPointAsync(AlgorithmOnline algoOnline, AlgorithmStat algoOnlineStat, int index, LineSeries oxyPlotSeries)
+		{
+			Task.Run(new Action(() =>
+				{
+					Thread.Sleep(1000);
+					Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(
+						() => ProcessNextAlgorithmOnlinePoint(algoOnline, algoOnlineStat, index, oxyPlotSeries)));
+				}
+			));
+		}
+
+		// ******************************************************************
+		private void TestOnlineOnClick(object sender, RoutedEventArgs e)
+		{
+			Task.Run(()=>TestConvexHullOnline());
+		}
+
+		// ******************************************************************
+		private void TestConvexHullOnline()
+		{ 
+		//			var ch = new OuelletConvexHullAvl2Online.ConvexHull();
+
+
+			// Model.AlgorithmTests(new List<Algorithm> { AlgorithmManager.Instance.Algorithms[AlgorithmManager.Instance.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineInterface]});
+
+
+			TestSetOfPoint testSet = ConvexHullTests.GetExtensiveTestSet();
+
+			//Test proper behavior Q1
+			Global.Instance.Quadrant = "Q1";
+			ExecuteOneSetOfTest(testSet);
+
+
+			//Test proper behavior Q2
+			Global.Instance.Quadrant = "Q2";
+			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			ExecuteOneSetOfTest(testSet);
+
+
+			//Test proper behavior Q3
+			Global.Instance.Quadrant = "Q3";
+			ConvexHullUtil.InvertCoordinate(testSet.Points, false, true);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, false, true);
+			ExecuteOneSetOfTest(testSet);
+
+
+			//Test proper behavior Q4
+			Global.Instance.Quadrant = "Q4";
+			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			ExecuteOneSetOfTest(testSet);
+
+
+			return;
+
+			//Model.GeneratePoints();
+
+			//Point[] results;
+
+			//foreach (Point pt in Model.Points)
+			//{
+			//	ch.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
+			//	results = ch.GetResultsAsArrayOfPoint();
+			//	int index = 1;
+			//	Debug.Assert(results.Length == ch.Count + 1 || (results.Length == 1 && ch.Count == 1));
+			//	Debug.Print($"Added. Count: {results.Length} - {ch.Count} ************************************************************************************");
+			//	foreach (Point ptIter in ch)
+			//	{
+			//		Debug.Print($"Index: {index++}, Point: {ptIter}.");	
+			//	}
+			//}
+		}
+		
+		// ************************************************************************
+		private void ExecuteOneSetOfTest(TestSetOfPoint testSet)
+		{
+			OuelletConvexHullAvl2Online.ConvexHullOnline ch;
+
+			Permutations.ForAllPermutation(testSet.Points, points =>
+			{
+				bool isIntergrityExceptionHappen;
+				do
+				{
+					isIntergrityExceptionHappen = false;
+
+					ch = new OuelletConvexHullAvl2Online.ConvexHullOnline();
+
+					try
+					{
+						foreach (Point pt in points)
+						{
+							ch.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
+
+							this.Dispatcher.BeginInvoke(new Action(() => DrawPoints(
+								new DrawInfo(testSet.Points, DrawStyle.Point, OxyColors.Aqua),
+								new DrawInfo(ch, DrawStyle.Line, OxyColors.Blue))), DispatcherPriority.Background);
+
+							Thread.Sleep(10);
+						}
+					}
+					catch (ConvexHullResultIntegrityException)
+					{
+						isIntergrityExceptionHappen = true;
+					}
+				} while (isIntergrityExceptionHappen);
+
+
+				var result = ch.GetResultsAsArrayOfPoint(true);
+
+				DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences("Online", points, testSet.ExpectedResult, result);
+				if (diffs.HasErrors)
+				{
+					Debugger.Break();
+				}
+
+				return ExecutionState.Continue;
+			});
+		}
+
+		// ************************************************************************
+		private void DrawPoints(params DrawInfo[] drawInfos)
+		{
+			Model.PlotModel.Series.Clear();
+
+			foreach (var drawInfo in drawInfos)
+			{
+				if (drawInfo.DrawStyle == DrawStyle.Line)
+				{
+					var s = new OxyPlot.Series.LineSeries { Title = drawInfo.Name, MarkerType = MarkerType.Square, Color = drawInfo.Color};
+					foreach(var pt in drawInfo.Points)
+					{
+						s.Points.Add(new DataPoint(pt.X, pt.Y));
+					}
+					Model.PlotModel.Series.Insert(0, s);
+				}
+				else if(drawInfo.DrawStyle == DrawStyle.Point)
+				{
+					var s = new OxyPlot.Series.ScatterSeries { Title = drawInfo.Name, MarkerType = MarkerType.Circle, MarkerSize = 2, MarkerFill = drawInfo.Color};
+					foreach (var pt in drawInfo.Points)
+					{
+						s.Points.Add(new ScatterPoint(pt.X, pt.Y));
+					}
+					Model.PlotModel.Series.Insert(0, s);
+				}
+			}
+
+			Model.PlotModel.PlotView?.InvalidatePlot();
+		}
+
+		// ************************************************************************
 	}
 }

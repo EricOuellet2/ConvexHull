@@ -74,7 +74,7 @@
 
 			<Grid>
 				<Grid.RowDefinitions>
-					<RowDefinition Height="2*"></RowDefinition>
+					<RowDefinition Height="*"></RowDefinition>
 					<RowDefinition Height="Auto"></RowDefinition>
 					<RowDefinition Height="3*"></RowDefinition>
 					<RowDefinition Height="Auto"></RowDefinition>
@@ -88,7 +88,7 @@
 
 				<GridSplitter Grid.Row="1" Height="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
-				<ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+				<ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" Margin="0,5,0,-5" Grid.RowSpan="4">
 					<Grid>
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto"></RowDefinition>
@@ -274,7 +274,7 @@
 								</StackPanel>
 							</GroupBox>
 
-							<GroupBox Width="480">
+							<GroupBox Width="400">
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Side-by-side algorithm validity check"></TextBlock>
@@ -297,7 +297,7 @@
 								</StackPanel>
 							</GroupBox>
 
-							<GroupBox Width="580">
+							<GroupBox Width="440">
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
 										<TextBlock Text="Deep performance test"></TextBlock>
@@ -353,7 +353,7 @@
 								</StackPanel>
 							</GroupBox>
 
-							<GroupBox Width="280">
+							<GroupBox Width="232">
 
 								<GroupBox.Header>
 									<StackPanel Style="{StaticResource Choice}">
@@ -369,6 +369,23 @@
 								</StackPanel>
 							</GroupBox>
 
+							<GroupBox Width="250">
+								<GroupBox.Header>
+									<StackPanel Style="{StaticResource Choice}">
+										<TextBlock Text="Test online convex Hull (Dynamic add)"></TextBlock>
+									</StackPanel>
+								</GroupBox.Header>
+
+								<StackPanel>
+									<WrapPanel>
+										<Button Click="TestOnlineConvexHull">Start test</Button>
+									</WrapPanel>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">Add a point continually at each second.</TextBlock>
+									
+									<Button Name="TestOnline" Click="TestOnlineOnClick">Test Convex Hull Online</Button>
+								</StackPanel>
+							</GroupBox>
+							
 						</WrapPanel>
 					</Grid>
 				</ScrollViewer>

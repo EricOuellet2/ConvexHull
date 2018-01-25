@@ -1,4 +1,6 @@
-﻿namespace General.AvlTreeSet
+﻿using System.Diagnostics;
+
+namespace General.AvlTreeSet
 {
 	public sealed class AvlNode<T>
 	{
@@ -11,7 +13,7 @@
 
 		// ******************************************************************
 		/// <summary>
-		/// Non recusive function that calc node height (mainly for debugging)
+		/// Non recursive function that calc node height (mainly for debugging)
 		/// </summary>
 		/// <returns></returns>
 		public int GetHeight() // Mainly for Debug purpose
@@ -21,7 +23,7 @@
 			while (node.Parent != null)
 			{
 				height++;
-				node = Parent;
+				node = node.Parent;
 			}
 
 			return height;
@@ -91,6 +93,68 @@
 			}
 
 			return null;
+		}
+
+		// ******************************************************************
+		public override bool Equals(object obj)
+		{
+			if (obj == null)
+			{
+				return false;
+			}
+
+			var node = obj as AvlNode<T>;
+			if (node == null)
+			{
+				return false;
+			}
+
+			if (this.Balance != node.Balance || !object.Equals(this.Item, node.Item))
+			{
+				return false;
+			}
+
+			if (this.Left != null)
+			{
+				if (node.Left == null)
+				{
+					return false;
+				}
+
+				if (!object.Equals(this.Left.Item, node.Left.Item))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (node.Left != null)
+				{
+					return false;
+				}
+			}
+
+			if (this.Right != null)
+			{
+				if (node.Right == null)
+				{
+					return false;
+				}
+
+				if (!object.Equals(this.Right.Item, node.Right.Item))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (node.Right != null)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		// ******************************************************************

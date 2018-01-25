@@ -14,12 +14,12 @@ namespace ConvexHullHelper
 	public class ConvexHullTests
 	{
 		// ******************************************************************
-		private Func<Point[], Point[]> _funcConvexHull;
+		private Func<Point[], IReadOnlyList<Point>> _funcConvexHull;
 		private Func<DifferencesInPath, ExecutionState> _funcShouldStopTesting = null; // Stop if return true
 
 		private Point[] _points;
 		private Point[] _referenceResults;
-		private Point[] _results;
+		private IReadOnlyList<Point> _results;
 
 		private string _algoName = null;
 
@@ -27,7 +27,7 @@ namespace ConvexHullHelper
 		public DifferencesInPath LastestDifferencesInPath { get; private set; }
 
 		// ******************************************************************
-		public ConvexHullTests(string algoName, Func<Point[], Point[]> funcConvexHull, Func<DifferencesInPath, ExecutionState> actionToDoOnErrorAndStopTestsIfReturnTrue)
+		public ConvexHullTests(string algoName, Func<Point[], IReadOnlyList<Point>> funcConvexHull, Func<DifferencesInPath, ExecutionState> actionToDoOnErrorAndStopTestsIfReturnTrue)
 		{
 			_algoName = algoName;
 			_funcConvexHull = funcConvexHull;
@@ -145,30 +145,12 @@ namespace ConvexHullHelper
 			return ExecutionState.Continue;
 		}
 
-		// ******************************************************************
-		// REturn false if should stop
-		public ExecutionState ExtensiveTests()
+		/// <summary>
+		/// Return a tuple of points, and expected convex hull result points
+		/// </summary>
+		public static TestSetOfPoint GetBasicTestSampleSet()
 		{
 			Point[] testPoint;
-
-
-			//testPoint = new Point[]
-			//	{
-			//	// first should be my Hull Points while others are wrong ones
-			//	new Point(1235, 4540),
-			//	new Point(1136, 3998),
-			//	new Point(1438, 4114),
-			//	new Point(1551, 4277),
-			//	new Point(1235, 4540),
-
-			//	// Limit  where first points are the hull points
-
-			//	};
-
-			//if (TestAllPossibilitesOnAllQuadrantAndShouldStop(testPoint, testPoint.Take(5).ToArray()))
-			//{
-			//	return false;
-			//}
 
 			testPoint = new Point[]
 			{
@@ -190,12 +172,13 @@ namespace ConvexHullHelper
 				new Point(0, 3)
 			};
 
-			if (TestAllPossibilitesOnAllQuadrantAndShouldStop(testPoint, testPoint.Take(4).ToArray()) == ExecutionState.Stop)
-			{
-				return ExecutionState.Stop;
-			}
-			
-			testPoint = new Point[]
+			return new TestSetOfPoint(testPoint, testPoint.Take(4).ToArray());
+		}
+
+		// ******************************************************************
+		public static TestSetOfPoint GetExtensiveTestSet()
+		{
+			Point[] testPoint = new Point[]
 			{
 				// first should be my Hull Points while others are wrong ones
 				new Point(13, 0),
@@ -214,7 +197,21 @@ namespace ConvexHullHelper
 				new Point(8, 10),
 			};
 
-			if (TestAllPossibilitesOnAllQuadrantAndShouldStop(testPoint, testPoint.Take(6).ToArray()) == ExecutionState.Stop)
+			return new TestSetOfPoint(testPoint, testPoint.Take(6).ToArray());
+		}
+
+		// ******************************************************************
+		// REturn false if should stop
+		public ExecutionState ExtensiveTests()
+		{
+			TestSetOfPoint testSet = GetBasicTestSampleSet();
+
+			if (TestAllPossibilitesOnAllQuadrantAndCheckIfShouldStop(testSet) == ExecutionState.Stop)
+			{
+				return ExecutionState.Stop;
+			}
+
+			if (TestAllPossibilitesOnAllQuadrantAndCheckIfShouldStop(GetExtensiveTestSet()) == ExecutionState.Stop)
 			{
 				return ExecutionState.Stop;
 			}
@@ -223,33 +220,33 @@ namespace ConvexHullHelper
 		}
 
 		// ******************************************************************
-		public ExecutionState TestAllPossibilitesOnAllQuadrantAndShouldStop(Point[] points, Point[] expectedConvexHullPoints)
+		public ExecutionState TestAllPossibilitesOnAllQuadrantAndCheckIfShouldStop(TestSetOfPoint testSet)
 		{
-			var actionTestConvexHull = new Func<Point[], ExecutionState>((pts) => TestConvexHull(pts, expectedConvexHullPoints));
+			var actionTestConvexHull = new Func<Point[], ExecutionState>((pts) => TestConvexHull(pts, testSet.ExpectedResult));
 
 			Global.Instance.Iteration = 0;
 
 			//Test proper behavior Q1
 			Global.Instance.Quadrant = "Q1";
-			if (Permutations.ForAllPermutation(points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
+			if (Permutations.ForAllPermutation(testSet.Points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
 
 			//Test proper behavior Q2
 			Global.Instance.Quadrant = "Q2";
-			ConvexHullUtil.InvertCoordinate(points, true, false);
-			ConvexHullUtil.InvertCoordinate(expectedConvexHullPoints, true, false);
-			if (Permutations.ForAllPermutation(points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
+			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			if (Permutations.ForAllPermutation(testSet.Points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
 
 			//Test proper behavior Q3
 			Global.Instance.Quadrant = "Q3";
-			ConvexHullUtil.InvertCoordinate(points, false, true);
-			ConvexHullUtil.InvertCoordinate(expectedConvexHullPoints, false, true);
-			if (Permutations.ForAllPermutation(points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
+			ConvexHullUtil.InvertCoordinate(testSet.Points, false, true);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, false, true);
+			if (Permutations.ForAllPermutation(testSet.Points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
 
 			//Test proper behavior Q4
 			Global.Instance.Quadrant = "Q4";
-			ConvexHullUtil.InvertCoordinate(points, true, false);
-			ConvexHullUtil.InvertCoordinate(expectedConvexHullPoints, true, false);
-			if (Permutations.ForAllPermutation(points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
+			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			if (Permutations.ForAllPermutation(testSet.Points, actionTestConvexHull) == ExecutionState.Stop) return ExecutionState.Stop;
 
 			return ExecutionState.Continue;
 		}
@@ -267,7 +264,7 @@ namespace ConvexHullHelper
 		{
 			Global.Instance.Iteration++;
 
-			Point[] convexHullPoints = _funcConvexHull(points);
+			IReadOnlyList<Point> convexHullPoints = _funcConvexHull(points);
 
 			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(_algoName, points, expectedHullResult, convexHullPoints);
 
