@@ -42,6 +42,21 @@ namespace ConvexHullHelper
 
 			DifferencesInPath diffs = new DifferencesInPath(_name, ptsSource, ptsReference, pts);
 
+			if (ptsReference.Count == 1 || ptsSource.Count == 1)
+			{
+				if (ptsReference.Count != ptsSource.Count)
+				{
+					diffs.CountOfPointsIsDifferent = true;
+					return diffs;
+				}
+
+				if (ptsReference[0] != ptsSource[0])
+				{
+					diffs.FirstSequenceErrorDetectedNearPoint = ptsReference[0];
+					return diffs;
+				}
+			}
+
 			if (ptsReference.Count > 0 && ptsReference[0] == ptsReference[ptsReference.Count - 1])
 			{
 				_countOfPtsRef = ptsReference.Count - 1;
@@ -75,24 +90,26 @@ namespace ConvexHullHelper
 				return diffs;
 			}
 
+			int indexStartPts;
+			
 			// Try to find a common start point to start iteration
-			int indexRef = 0;
-			int indexPts = -1;
-
-			for (indexPts = 0; indexPts < _countOfPtsToCompare; indexPts++)
+			for (indexStartPts = 0; indexStartPts < _countOfPtsToCompare; indexStartPts++)
 			{
-				if (pts[indexPts] == ptsReference[0])
+				if (pts[indexStartPts] == ptsReference[0])
 				{
 					break;
 				}
 			}
 
-			if (indexPts == -1)
+			if (indexStartPts == -1 || indexStartPts >= _countOfPtsToCompare)
 			{
 				diffs.FirstSequenceErrorDetectedNearPoint = ptsReference[0];
 				FillDifferentPointCollections(ptsReference, pts, diffs);
 				return diffs;
 			}
+
+			int indexPts = indexStartPts;
+			int indexRef;
 
 			int errorAtRefIndex = -1;
 			for (indexRef = 0; indexRef < _countOfPtsRef; indexRef++)
@@ -120,15 +137,14 @@ namespace ConvexHullHelper
 			if (indexRef == 1) // We should try reverse order
 			{
 				// try reverse order ???
-				if (indexPts > 0)
-				{
-					indexPts--;
-				}
-				else
-				{
-					indexPts = _countOfPtsToCompare - 1;
-				}
+				indexPts = indexStartPts;
 				errorAtRefIndex = -1;
+			}
+			else
+			{
+				diffs.FirstSequenceErrorDetectedNearPoint = ptsReference[errorAtRefIndex];
+				FillDifferentPointCollections(ptsReference, pts, diffs);
+				return diffs;
 			}
 
 			for (indexRef = 0; indexRef < _countOfPtsRef; indexRef++)

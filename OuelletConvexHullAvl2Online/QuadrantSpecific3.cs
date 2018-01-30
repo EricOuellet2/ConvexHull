@@ -83,16 +83,84 @@ namespace OuelletConvexHullAvl2Online
 			RootPoint = new Point(bottomX, leftY);
 		}
 
+		//// ******************************************************************
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//protected override bool IsGoodQuadrantForPoint(Point pt)
+		//{
+		//	if (pt.X < this.RootPoint.X && pt.Y < this.RootPoint.Y)
+		//	{
+		//		return true;
+		//	}
+
+		//	return false;
+		//}
+
 		// ******************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool IsGoodQuadrantForPoint(Point pt)
+		internal override int IsHullPoint(ref Point point)
 		{
-			if (pt.X < this.RootPoint.X && pt.Y < this.RootPoint.Y)
+			CurrentNode = Root;
+			AvlNode<Point> currentPrevious = null;
+			AvlNode<Point> currentNext = null;
+
+			while (CurrentNode != null)
 			{
-				return true;
+				if (point.X > CurrentNode.Item.X)
+				{
+					if (CurrentNode.Right != null)
+					{
+						CurrentNode = CurrentNode.Right;
+						continue;
+					}
+					currentNext = CurrentNode.GetNextNode();
+					if (CanQuickReject(ref point, ref currentNext.Item))
+					{
+						return 0;
+					}
+
+					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
+					{
+						return 0;
+					}
+				}
+				else if (point.X < CurrentNode.Item.X)
+				{
+					if (CurrentNode.Left != null)
+					{
+						CurrentNode = CurrentNode.Left;
+						continue;
+					}
+
+					currentPrevious = CurrentNode.GetPreviousNode();
+					if (CanQuickReject(ref point, ref currentPrevious.Item))
+					{
+						return 0;
+					}
+
+					if (!IsPointToTheRightOfOthers(currentPrevious.Item, CurrentNode.Item, point))
+					{
+						return 0;
+					}
+				}
+				else
+				{
+					if (point.Y >= CurrentNode.Item.Y)
+					{
+						if (point.Y == CurrentNode.Item.Y)
+						{
+							return -1;
+						}
+
+						return 0; // invalid point
+					}
+
+					return 1;
+				}
+
+				return 1;
 			}
 
-			return false;
+			return 0;
 		}
 
 		// ******************************************************************
@@ -101,7 +169,7 @@ namespace OuelletConvexHullAvl2Online
 		/// It is specific by Quadrant to improve efficiency.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void ProcessPoint(ref Point point)
+		internal override int ProcessPoint(ref Point point)
 		{
 			CurrentNode = Root;
 			AvlNode<Point> currentPrevious = null;
@@ -125,18 +193,18 @@ namespace OuelletConvexHullAvl2Online
 					currentNext = CurrentNode.GetNextNode();
 					if (CanQuickReject(ref point, ref currentNext.Item))
 					{
-						return;
+						return 0;
 					}
 
 					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
 					{
-						return;
+						return 0;
 					}
 
-					if (CurrentNode.Item == point) // Ensure to have no duplicate
-					{
-						continue;
-					}
+					//if (CurrentNode.Item == point) // Ensure to have no duplicate
+					//{
+					//	continue;
+					//}
 
 					insertionSide = Side.Right;
 				}
@@ -151,18 +219,18 @@ namespace OuelletConvexHullAvl2Online
 					currentPrevious = CurrentNode.GetPreviousNode();
 					if (CanQuickReject(ref point, ref currentPrevious.Item))
 					{
-						return;
+						return 0;
 					}
 
 					if (!IsPointToTheRightOfOthers(currentPrevious.Item, CurrentNode.Item, point))
 					{
-						return;
+						return 0;
 					}
 
-					if (CurrentNode.Item == point) // Ensure to have no duplicate
-					{
-						return;
-					}
+					//if (CurrentNode.Item == point) // Ensure to have no duplicate
+					//{
+					//	return;
+					//}
 
 					insertionSide = Side.Left;
 				}
@@ -170,13 +238,18 @@ namespace OuelletConvexHullAvl2Online
 				{
 					if (point.Y >= CurrentNode.Item.Y)
 					{
-						return; // invalid point
+						if (point.Y == CurrentNode.Item.Y)
+						{
+							return -1;
+						}
+
+						return 0; // invalid point
 					}
 
 					// Replace CurrentNode point with point
 					CurrentNode.Item = point;
 					InvalidateNeighbors(CurrentNode.GetPreviousNode(), CurrentNode, CurrentNode.GetNextNode());
-					return;
+					return 1;
 				}
 
 				//We should insert the point
@@ -189,7 +262,7 @@ namespace OuelletConvexHullAvl2Online
 					{
 						CurrentNode.Item = point;
 						InvalidateNeighbors(currentPrevious, CurrentNode, currentNext);
-						return;
+						return 1;
 					}
 
 					var nextNext = currentNext.GetNextNode();
@@ -197,7 +270,7 @@ namespace OuelletConvexHullAvl2Online
 					{
 						currentNext.Item = point;
 						InvalidateNeighbors(null, currentNext, nextNext);
-						return;
+						return 1;
 					}
 				}
 				else // Left
@@ -207,7 +280,7 @@ namespace OuelletConvexHullAvl2Online
 					{
 						CurrentNode.Item = point;
 						InvalidateNeighbors(currentPrevious, CurrentNode, currentNext);
-						return;
+						return 1;
 					}
 
 					var previousPrevious = currentPrevious.GetPreviousNode();
@@ -215,7 +288,7 @@ namespace OuelletConvexHullAvl2Online
 					{
 						currentPrevious.Item = point;
 						InvalidateNeighbors(previousPrevious, currentPrevious, null);
-						return;
+						return 1;
 					}
 				}
 
@@ -236,9 +309,10 @@ namespace OuelletConvexHullAvl2Online
 					this.AddBalance(newNode.Parent, 1);
 				}
 
-				return;
+				return 1;
 			}
 
+			return 0;
 		}
 
 		// ******************************************************************

@@ -9,6 +9,7 @@ using System.Windows;
 using Mathematic;
 using MonotoneChain;
 using System.Windows.Media;
+using ConvexHullHelper;
 
 namespace ConvexHullWorkbench
 {
@@ -18,13 +19,17 @@ namespace ConvexHullWorkbench
 
 		private List<Algorithm> _algorithms = new List<Algorithm>();
 
-		public IReadOnlyList<Algorithm> Algorithms { get { return _algorithms; } }
+		public IReadOnlyList<Algorithm> Algorithms
+		{
+			get { return _algorithms; }
+		}
 
 		private AlgorithmManager()
 		{
 			// Color c = Colors.
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Graham Scan modified", "Rod Stephens", "Slowest but simple and great for comparison.", OxyPlot.OxyColors.DarkKhaki,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Graham Scan modified", "Rod Stephens", "Slowest but simple and great for comparison.",
+				OxyPlot.OxyColors.DarkKhaki,
 				(points, algorithmStat) =>
 				{
 					var stopwatch = Stopwatch.StartNew();
@@ -38,7 +43,8 @@ namespace ConvexHullWorkbench
 					return result.ToArray();
 				}));
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Monotone chain", "A. M. Andrew, David Piepgrass (Qwerties)", "Very slow. Got on the web.", OxyPlot.OxyColors.Chocolate,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Monotone chain", "A. M. Andrew, David Piepgrass (Qwerties)", "Very slow. Got on the web.",
+				OxyPlot.OxyColors.Chocolate,
 				(points, algorithmStat) =>
 				{
 					var stopwatch = Stopwatch.StartNew();
@@ -71,7 +77,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexHeap = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "MI ConvexHUll (Delaunay/Voronoi)", "Delaunay and Voronoi, davecz", "Slow. From CodePlex. Could do 3D.", OxyPlot.OxyColors.Indigo,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "MI ConvexHUll (Delaunay/Voronoi)", "Delaunay and Voronoi, davecz",
+				"Slow. From CodePlex. Could do 3D.", OxyPlot.OxyColors.Indigo,
 				(points, algorithmStat) =>
 				{
 					var vertices = new Vertex[points.Length];
@@ -111,7 +118,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexMiConvexHull = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Chan", "Chan, Pat Morin", "C code. Has a little bug (happen rarely). Got on the web.", OxyPlot.OxyColors.Red,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Chan", "Chan, Pat Morin", "C code. Has a little bug (happen rarely). Got on the web.",
+				OxyPlot.OxyColors.Red,
 				(points, algorithmStat) =>
 				{
 					Point[] result = null;
@@ -138,7 +146,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexChan = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "LiuAndChen", "Liu and Chen, Eric Ouellet", "The same as Ouellet without my optimization", OxyPlot.OxyColors.LightSkyBlue,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "LiuAndChen", "Liu and Chen, Eric Ouellet", "The same as Ouellet without my optimization",
+				OxyPlot.OxyColors.LightSkyBlue,
 				(points, algorithmStat) =>
 				{
 					LiuAndChen.ConvexHull convexHull = new LiuAndChen.ConvexHull(points);
@@ -158,7 +167,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHullSingleThread = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array copy)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.", OxyPlot.OxyColors.Purple,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array copy)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.",
+				OxyPlot.OxyColors.Purple,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHullArray.ConvexHull convexHull = new OuelletConvexHullArray.ConvexHull(OuelletConvexHullArray.PointArrayManipulationType.ArrayCopy, points);
@@ -168,37 +178,44 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHullSingleThreadArray = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array C memcpy)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.", OxyPlot.OxyColors.HotPink,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array C memcpy)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.",
+				OxyPlot.OxyColors.HotPink,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullArray.ConvexHull convexHull = new OuelletConvexHullArray.ConvexHull(OuelletConvexHullArray.PointArrayManipulationType.UnsafeCMemCopy, points);
+					OuelletConvexHullArray.ConvexHull convexHull =
+						new OuelletConvexHullArray.ConvexHull(OuelletConvexHullArray.PointArrayManipulationType.UnsafeCMemCopy, points);
 					convexHull.CalcConvexHull(OuelletConvexHullArray.ConvexHullThreadUsage.OnlyOne);
 					return convexHull.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullSingleThreadArrayMemCpy = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array copy immu)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.", OxyPlot.OxyColors.Olive,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array copy immu)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.",
+				OxyPlot.OxyColors.Olive,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullArray.ConvexHull convexHull = new OuelletConvexHullArray.ConvexHull(OuelletConvexHullArray.PointArrayManipulationType.ArrayCopyImmutable, points);
+					OuelletConvexHullArray.ConvexHull convexHull =
+						new OuelletConvexHullArray.ConvexHull(OuelletConvexHullArray.PointArrayManipulationType.ArrayCopyImmutable, points);
 					convexHull.CalcConvexHull(OuelletConvexHullArray.ConvexHullThreadUsage.OnlyOne);
 					return convexHull.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullSingleThreadArrayImmu = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array memcpy no indirect)", "Eric Ouellet, Eric Ouellet", "Array instead of a List.", OxyPlot.OxyColors.Gold,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# ST (array memcpy no indirect)", "Eric Ouellet, Eric Ouellet",
+				"Array instead of a List.", OxyPlot.OxyColors.Gold,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullArrayNoIndirect.ConvexHull convexHull = new OuelletConvexHullArrayNoIndirect.ConvexHull(OuelletConvexHullArrayNoIndirect.PointArrayManipulationType.ArrayCopyImmutable, points);
+					OuelletConvexHullArrayNoIndirect.ConvexHull convexHull =
+						new OuelletConvexHullArrayNoIndirect.ConvexHull(OuelletConvexHullArrayNoIndirect.PointArrayManipulationType.ArrayCopyImmutable, points);
 					convexHull.CalcConvexHull(OuelletConvexHullArrayNoIndirect.ConvexHullThreadUsage.OnlyOne);
 					return convexHull.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullSingleThreadArrayMemCpyNoIndirect = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl", "Eric Ouellet, Eric Ouellet", "Same as ST but with Avl Tree instead of List.", OxyPlot.OxyColors.Orange,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl", "Eric Ouellet, Eric Ouellet",
+				"Same as ST but with Avl Tree instead of List.", OxyPlot.OxyColors.Orange,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHullAvl.ConvexHullAvl convexHull = new OuelletConvexHullAvl.ConvexHullAvl(points);
@@ -208,7 +225,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHullAvl = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2", "Eric Ouellet, Eric Ouellet", "Same as AVL with some optimisation.", OxyPlot.OxyColors.Blue,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2", "Eric Ouellet, Eric Ouellet", "Same as AVL with some optimisation.",
+				OxyPlot.OxyColors.Blue,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHullAvl2.ConvexHullAvl convexHull = new OuelletConvexHullAvl2.ConvexHullAvl(points);
@@ -219,7 +237,8 @@ namespace ConvexHullWorkbench
 			AlgoIndexOuelletConvexHullAvl2 = _algorithms.Count - 1;
 
 			// Color c = Colors.
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online", "Eric Ouellet, Eric Ouellet", "Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkCyan,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online (add point in batch, same usage as AVL v2)",
+				"Eric Ouellet, Eric Ouellet", "Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkCyan,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline(points);
@@ -229,21 +248,46 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHullAvl2Online = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online (online use)", "Eric Ouellet, Eric Ouellet", "Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkOrchid,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online (add point one by one in a loop)", "Eric Ouellet, Eric Ouellet",
+				"Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkOrchid,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline();
+
+					// TEST to ensure that IsHullPoint and DynamicallyAddAnotherPointToConvexHullIfAppropriate appears to be coherent and works fine.
+					//foreach (Point pt in points)
+					//{
+					//	Point[] ptsBefore = convexHullOnline.GetResultsAsArrayOfPoint();
+					//	int countBefore = convexHullOnline.Count;
+					//	int t = convexHullOnline.IsHullPoint(pt);
+					//	int r = convexHullOnline.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
+					//	Point[] ptsAfter = convexHullOnline.GetResultsAsArrayOfPoint();
+
+					//	Debug.Assert(t == r);
+
+					//	DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences("", points, ptsAfter, ptsBefore);
+					//	if (r == 1)
+					//	{
+					//		Debug.Assert(diffs.HasErrors);
+					//	}
+					//	else
+					//	{
+					//		Debug.Assert(! diffs.HasErrors);
+					//	}
+					//}
+
 					foreach (Point pt in points)
 					{
-						convexHullOnline.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
+						convexHullOnline.TryAddOnePoint(pt);
 					}
-					
+
 					return convexHullOnline.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineUse = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# 4T", "Eric Ouellet, Eric Ouellet", "1 thread per quadrant for part 2", OxyPlot.OxyColors.SlateBlue,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# 4T", "Eric Ouellet, Eric Ouellet", "1 thread per quadrant for part 2",
+				OxyPlot.OxyColors.SlateBlue,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHull.ConvexHull convexHull = new OuelletConvexHull.ConvexHull(points);
@@ -253,7 +297,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHull4Threads = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# MT", "Eric Ouellet, Eric Ouellet", "All thread part 1, 4 threads part 2, 1 thread part 3", OxyPlot.OxyColors.SaddleBrown,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# MT", "Eric Ouellet, Eric Ouellet",
+				"All thread part 1, 4 threads part 2, 1 thread part 3", OxyPlot.OxyColors.SaddleBrown,
 				(points, algorithmStat) =>
 				{
 					OuelletConvexHull.ConvexHull convexHull = new OuelletConvexHull.ConvexHull(points);
@@ -263,7 +308,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexOuelletConvexHullMultiThreads = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet CPP ST", "Eric Ouellet, Eric Ouellet", " thread, highly optimized, very ugly code", OxyPlot.OxyColors.YellowGreen,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet CPP ST", "Eric Ouellet, Eric Ouellet", " thread, highly optimized, very ugly code",
+				OxyPlot.OxyColors.YellowGreen,
 				(points, algorithmStat) =>
 				{
 					double elapsedTime = 0;
@@ -280,45 +326,46 @@ namespace ConvexHullWorkbench
 				}));
 
 			AlgoIndexOuelletConvexHullCpp = _algorithms.Count - 1;
-			
+
 
 			// Color r = Colors.CornflowerBlue;
-			_algorithms.Add(new AlgorithmOnline(AlgorithmType.ConvexHullOnline, "Ouellet C# Avl v2 Online", "Eric Ouellet, Eric Ouellet", "~Same as AVL v2 with dynamic add in Log(h).", OxyPlot.OxyColors.CornflowerBlue,
-					() =>
+			_algorithms.Add(new AlgorithmOnline(AlgorithmType.ConvexHullOnline, "Ouellet C# Avl v2 Online (** Only for Online performance test)", "Eric Ouellet, Eric Ouellet",
+				"Add point one by one for 'merging' performance test only.", OxyPlot.OxyColors.CornflowerBlue, () =>
+				{
+					return new OuelletConvexHullAvl2Online.ConvexHullOnline();
+				},
+
+				(Object obj, Point pt, AlgorithmStat stat) =>
+				{
+					var convexHullOnline = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
+					if (convexHullOnline == null)
 					{
-						return new OuelletConvexHullAvl2Online.ConvexHullOnline();
-					},
-					
-					(Object obj, Point pt, AlgorithmStat stat) =>
+						throw new ArgumentException($"argument obj: '{obj}' is invalid.");
+					}
+
+					Stopwatch stopwatch = Stopwatch.StartNew();
+					int result = convexHullOnline.TryAddOnePoint(pt);
+					stopwatch.Stop();
+
+					stat.TimeSpanCSharp = stat.TimeSpanCSharp.Add(stopwatch.Elapsed);
+
+					return result == 1;
+				},
+
+				(Object obj) =>
+				{
+					var ch = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
+					if (ch == null)
 					{
-						var ch = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
-						if (ch == null)
-						{
-							throw new ArgumentException($"argument obj: '{obj}' is invalid.");
-						}
-
-						Stopwatch stopwatch = Stopwatch.StartNew();
-						bool isAdded = ch.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
-						stopwatch.Stop();
-
-						stat.TimeSpanCSharp = stat.TimeSpanCSharp.Add(stopwatch.Elapsed);
-
-						return isAdded;
-					},
-
-					(Object obj) =>
-					{
-						var ch = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
-						if (ch == null)
-						{
-							throw new ArgumentException($"argument obj: '{obj}' is invalid.");
-						}
-						return ch.GetResultsAsArrayOfPoint();
-					}));
+						throw new ArgumentException($"argument obj: '{obj}' is invalid.");
+					}
+					return ch.GetResultsAsArrayOfPoint();
+				}));
 
 			AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineInterface = _algorithms.Count - 1;
-			
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.SmallestEnclosingCircle, "Smallest Enclosing Circle", "Rod Stephens, Rod Stephens", "Slow Slow Slow. Select max 500 pts.", OxyPlot.OxyColors.Red,
+
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.SmallestEnclosingCircle, "Smallest Enclosing Circle", "Rod Stephens, Rod Stephens",
+				"Slow Slow Slow. Select max 500 pts.", OxyPlot.OxyColors.Red,
 				(points, algorithmStat) =>
 				{
 					var stopwatch = Stopwatch.StartNew();
@@ -341,7 +388,8 @@ namespace ConvexHullWorkbench
 
 			AlgoIndexSmallestEnclosingCircle = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.SmallestEnclosingCircle, "Smallest Enclosing Circle from ConvexHull (Ouellet ST)", "Rod Stephens, Rod Stephens", "Same algo as previous but points are first filtered by the Convex Hull algo", OxyPlot.OxyColors.Blue,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.SmallestEnclosingCircle, "Smallest Enclosing Circle from ConvexHull (Ouellet ST)",
+				"Rod Stephens, Rod Stephens", "Same algo as previous but points are first filtered by the Convex Hull algo", OxyPlot.OxyColors.Blue,
 				(points, algorithmStat) =>
 				{
 					var stopwatch = Stopwatch.StartNew();
@@ -394,5 +442,6 @@ namespace ConvexHullWorkbench
 
 		public int AlgoIndexSmallestEnclosingCircle { get; private set; }
 		public int AlgoIndexSmallestEnclosingCircleFromConvexHull { get; private set; }
+
 	}
 }

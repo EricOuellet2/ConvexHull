@@ -30,25 +30,27 @@ namespace ConvexHullWorkbench
 			FuncGetResult = funcGetResult;
 		}
 
-		private object _instance = null;
+		public object Algo { get; private set; }= null;
+
 		public AlgorithmStat Stat { get; private set; }
+
 		// ******************************************************************
 		public void Init()
 		{
-			_instance = FuncInitNew();
+			Algo = FuncInitNew();
 			Stat = new AlgorithmStat();
 		}
 
 		// ******************************************************************
 		public bool AddPoint(Point pt)
 		{
-			return FuncAddPoint(_instance, pt, Stat);
+			return FuncAddPoint(Algo, pt, Stat);
 		}
 
 		// ******************************************************************
 		public IReadOnlyList<Point> GetResult()
 		{
-			return FuncGetResult(_instance);
+			return FuncGetResult(Algo);
 		}
 
 		//// ******************************************************************

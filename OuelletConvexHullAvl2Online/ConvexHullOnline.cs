@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using System.Windows;
 using General.AvlTreeSet;
+using OuelletConvexHullAvl2Online;
 
 namespace OuelletConvexHullAvl2Online
 {
@@ -290,6 +292,7 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ************************************************************************
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ProcessPointsForNotDisjointQuadrant(Point[] points)
 		{
 			Point point;
@@ -599,6 +602,152 @@ namespace OuelletConvexHullAvl2Online
 			}
 		}
 
+		// ************************************************************************
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="point"></param>
+		/// <returns>1 = hull point, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int IsHullPointInsideLimit(Point point)
+		{
+			int result;
+
+			if (point.X > _q1.RootPoint.X && point.Y > _q1.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q1.FirstPoint, _q1.LastPoint, point))
+				{
+					result = _q1.IsHullPoint(ref point);
+					if (result != 0)
+					{
+						return result;
+					}
+				}
+
+				if (Geometry.IsPointToTheRightOfOthers(_q3.FirstPoint, _q3.LastPoint, point))
+				{
+					return _q3.IsHullPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X < _q2.RootPoint.X && point.Y > _q2.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q2.FirstPoint, _q2.LastPoint, point))
+				{
+					result = _q2.IsHullPoint(ref point);
+					if (result != 0)
+					{
+						return result;
+					}
+				}
+
+				if (Geometry.IsPointToTheRightOfOthers(_q4.FirstPoint, _q4.LastPoint, point))
+				{
+					return _q4.IsHullPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X < _q3.RootPoint.X && point.Y < _q3.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q3.FirstPoint, _q3.LastPoint, point))
+				{
+					return _q3.IsHullPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X > _q4.RootPoint.X && point.Y < _q4.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q4.FirstPoint, _q4.LastPoint, point))
+				{
+					return _q4.IsHullPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			return 0;
+		}
+
+		// ************************************************************************
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="point"></param>
+		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int ProcessPointForNotDisjointQuadrant(Point point)
+		{
+			int result;
+
+			if (point.X > _q1.RootPoint.X && point.Y > _q1.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q1.FirstPoint, _q1.LastPoint, point))
+				{
+					result = _q1.ProcessPoint(ref point);
+					if (result != 0)
+					{
+						return result;
+					}
+				}
+
+				if (Geometry.IsPointToTheRightOfOthers(_q3.FirstPoint, _q3.LastPoint, point))
+				{
+					return _q3.ProcessPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X < _q2.RootPoint.X && point.Y > _q2.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q2.FirstPoint, _q2.LastPoint, point))
+				{
+					result = _q2.ProcessPoint(ref point);
+					if (result != 0)
+					{
+						return result;
+					}
+				}
+
+				if (Geometry.IsPointToTheRightOfOthers(_q4.FirstPoint, _q4.LastPoint, point))
+				{
+					return _q4.ProcessPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X < _q3.RootPoint.X && point.Y < _q3.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q3.FirstPoint, _q3.LastPoint, point))
+				{
+					return _q3.ProcessPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			if (point.X > _q4.RootPoint.X && point.Y < _q4.RootPoint.Y)
+			{
+				if (Geometry.IsPointToTheRightOfOthers(_q4.FirstPoint, _q4.LastPoint, point))
+				{
+					return _q4.ProcessPoint(ref point);
+				}
+
+				return 0;
+			}
+
+			return 0;
+		}
+
+
+
 		#region Online (Dynamic add)
 
 		// ************************************************************************
@@ -623,10 +772,148 @@ namespace OuelletConvexHullAvl2Online
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>Return true if added, false otherwise</returns>
-		public bool DynamicallyAddAnotherPointToConvexHullIfAppropriate(Point pt)
+		public int IsHullPoint(Point pt)
 		{
-			bool isHullAsBeenModified = false;
+			if (!IsInitDone)
+			{
+				return 1;
+			}
 
+			//
+			// Step 1/2: 
+			// Find if the new point does affect quadrant boundary (limits).
+			// If so, correct affected quadrants limits accordingly ...
+			// (what should be done prior to try to insert any point in its (or 2) possible quadrant).
+			// 
+
+			LimitEnum limitAffectd = 0;
+
+			if (pt.X >= Right)
+			{
+				// Should update both quadrant affected accordingly					
+
+				//Q4
+				if (pt.X > Right || pt.Y < _q4.LastPoint.Y)
+				{
+					if (pt.Y <= Bottom)
+					{
+						limitAffectd |= LimitEnum.Bottom;
+					}
+
+					limitAffectd |= LimitEnum.Right;
+				}
+
+				// Q1
+				if (pt.X > Right || pt.Y > _q1.FirstPoint.Y)
+				{
+					if (pt.Y >= Top)
+					{
+						limitAffectd |= LimitEnum.Top;
+					}
+
+					limitAffectd |= LimitEnum.Right;
+				}
+			}
+
+			if (pt.Y >= Top)
+			{
+				// Should update both quadrant affected accordingly					
+
+				// Q1
+				if (pt.Y > Top || pt.X > _q1.LastPoint.X)
+				{
+					if (pt.X >= Right)
+					{
+						limitAffectd |= LimitEnum.Right;
+					}
+
+					limitAffectd |= LimitEnum.Top;
+				}
+
+				//Q2
+				if (pt.Y > Top || pt.X < _q2.FirstPoint.X)
+				{
+					if (pt.X <= Left)
+					{
+						limitAffectd |= LimitEnum.Left;
+					}
+
+					limitAffectd |= LimitEnum.Top;
+				}
+			}
+
+			if (pt.X <= Left)
+			{
+				// Should update both quadrant affected accordingly					
+
+				// Q2
+				if (pt.X < Left || pt.Y > _q2.LastPoint.Y)
+				{
+					if (pt.Y >= Top)
+					{
+						limitAffectd |= LimitEnum.Top;
+					}
+
+					limitAffectd |= LimitEnum.Left;
+				}
+
+				//Q3
+				if (pt.X < Left || pt.Y < _q3.FirstPoint.Y)
+				{
+					if (pt.Y <= Bottom)
+					{
+						limitAffectd |= LimitEnum.Bottom;
+					}
+
+					limitAffectd |= LimitEnum.Left;
+				}
+			}
+
+			if (pt.Y <= Bottom)
+			{
+				// Should update both quadrant affected accordingly					
+
+				// Q3
+				if (pt.Y < Bottom || pt.X < _q3.LastPoint.X)
+				{
+					if (pt.X <= Left)
+					{
+						limitAffectd |= LimitEnum.Left;
+					}
+
+					limitAffectd |= LimitEnum.Bottom;
+				}
+
+				//Q4
+				if (pt.Y < Bottom || pt.X > _q4.FirstPoint.X)
+				{
+					if (pt.X >= Right)
+					{
+						limitAffectd |= LimitEnum.Right;
+					}
+
+					limitAffectd |= LimitEnum.Bottom;
+				}
+			}
+
+			if (limitAffectd != 0)
+			{
+				return 1;
+			}
+
+			return IsHullPointInsideLimit(pt);
+		}
+
+		// ************************************************************************
+		/// <summary>
+		/// Will add another point to the convex hull if appropriate.
+		/// "Init" should have been called prior to use this method.
+		/// Duplication of code (partial or complete is intentional in order to save some call)
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns>Return true if added, false otherwise</returns>
+		public int TryAddOnePoint(Point pt)
+		{
 			if (!IsInitDone)
 			{
 				_pointsArrayForDynamicCall[0] = pt;
@@ -638,8 +925,7 @@ namespace OuelletConvexHullAvl2Online
 				_q2.Prepare();
 				_q3.Prepare();
 				_q4.Prepare();
-
-				return true;
+				return 1;
 			}
 
 			//
@@ -668,13 +954,10 @@ namespace OuelletConvexHullAvl2Online
 						_q4.LastPoint = pt;
 						_q4.RootPoint = new Point(_q4.FirstPoint.X, pt.Y);
 						var avlPoint = _q4.AddOrUpdate(pt);
-						if (avlPoint != null) // if already exists, do nothing
-						{
-							_q4.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
-						}
+						_q4.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Right;
 				}
 
 				// Q1
@@ -690,17 +973,11 @@ namespace OuelletConvexHullAvl2Online
 						_q1.FirstPoint = pt;
 						_q1.RootPoint = new Point(_q1.LastPoint.X, pt.Y);
 						var avlPoint = _q1.AddOrUpdate(pt);
-
-						if (avlPoint != null) // if already exists, do nothing
-						{
-							_q1.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
-						}
+						_q1.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Right;
 				}
-
-				limitAffectd |= LimitEnum.Right;
 			}
 
 			if (pt.Y >= Top)
@@ -721,27 +998,21 @@ namespace OuelletConvexHullAvl2Online
 						_q1.RootPoint = new Point(pt.X, _q1.FirstPoint.Y);
 						var avlPoint = _q1.AddOrUpdate(pt);
 
-						if (avlPoint != null) // if already exists, do nothing
+						// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
+						for (; ; )
 						{
-							// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
-							for (; ; )
+							AvlNode<Point> nodeToRemove = avlPoint.GetNextNode();
+							if (nodeToRemove == null)
 							{
-								AvlNode<Point> nodeToRemove = avlPoint.GetNextNode();
-								if (nodeToRemove == null)
-								{
-									break;
-								}
-								_q1.RemoveNodeSafe(nodeToRemove);
+								break;
 							}
-
-							//_q1.RemoveNode(nodeToRemoveAutomatically);
-							//nodeToRemoveAutomatically = nodeToRemoveAutomatically.GetNextNode();
-
-							_q1.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
+							_q1.RemoveNodeSafe(nodeToRemove);
 						}
+
+						_q1.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Top;
 				}
 
 				//Q2
@@ -758,38 +1029,22 @@ namespace OuelletConvexHullAvl2Online
 						_q2.RootPoint = new Point(pt.X, _q2.LastPoint.Y);
 						var avlPoint = _q2.AddOrUpdate(pt);
 
-						if (avlPoint != null) // if already exists, do nothing
+						// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
+						for (; ; )
 						{
-							// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
-							for (; ; )
+							AvlNode<Point> nodeToRemove = avlPoint.GetPreviousNode();
+							if (nodeToRemove == null)
 							{
-								AvlNode<Point> nodeToRemove = avlPoint.GetPreviousNode();
-								if (nodeToRemove == null)
-								{
-									break;
-								}
-								_q2.RemoveNodeSafe(nodeToRemove);
+								break;
 							}
-
-							//AvlNode<Point> nodeToRemoveAutomatically = avlPoint.GetPreviousNode();
-							//while (nodeToRemoveAutomatically != null)
-							//{
-							//	AvlNode<Point> nodeTemp = nodeToRemoveAutomatically.GetPreviousNode();
-							//	_q2.RemoveNode(nodeToRemoveAutomatically);
-							//	nodeToRemoveAutomatically = nodeTemp;
-
-							//	//_q2.RemoveNode(nodeToRemoveAutomatically);
-							//	//nodeToRemoveAutomatically = nodeToRemoveAutomatically.GetPreviousNode();
-							//}
-
-							_q2.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
+							_q2.RemoveNodeSafe(nodeToRemove);
 						}
+
+						_q2.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Top;
 				}
-
-				limitAffectd |= LimitEnum.Top;
 			}
 
 			if (pt.X <= Left)
@@ -809,13 +1064,10 @@ namespace OuelletConvexHullAvl2Online
 						_q2.LastPoint = pt;
 						_q2.RootPoint = new Point(_q2.FirstPoint.X, pt.Y);
 						var avlPoint = _q2.AddOrUpdate(pt);
-						if (avlPoint != null) // if already exists, do nothing
-						{
-							_q2.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
-						}
+						_q2.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Left;
 				}
 
 				//Q3
@@ -831,16 +1083,11 @@ namespace OuelletConvexHullAvl2Online
 						_q3.FirstPoint = pt;
 						_q3.RootPoint = new Point(_q3.LastPoint.X, pt.Y);
 						var avlPoint = _q3.AddOrUpdate(pt);
-						if (avlPoint != null) // if already exists, do nothing
-						{
-							_q3.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
-						}
+						_q3.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Left;
 				}
-
-				limitAffectd |= LimitEnum.Left;
 			}
 
 			if (pt.Y <= Bottom)
@@ -861,35 +1108,21 @@ namespace OuelletConvexHullAvl2Online
 						_q3.RootPoint = new Point(pt.X, _q3.FirstPoint.Y);
 						var avlPoint = _q3.AddOrUpdate(pt);
 
-						if (avlPoint != null) // if already exists, do nothing
+						// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
+						for (; ; )
 						{
-							// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
-							for (; ; )
+							AvlNode<Point> nodeToRemove = avlPoint.GetNextNode();
+							if (nodeToRemove == null)
 							{
-								AvlNode<Point> nodeToRemove = avlPoint.GetNextNode();
-								if (nodeToRemove == null)
-								{
-									break;
-								}
-								_q3.RemoveNodeSafe(nodeToRemove);
+								break;
 							}
-
-							//AvlNode<Point> nodeToRemoveAutomatically = avlPoint.GetNextNode();
-							//while (nodeToRemoveAutomatically != null)
-							//{
-							//	AvlNode<Point> nodeTemp = nodeToRemoveAutomatically.GetNextNode();
-							//	_q3.RemoveNode(nodeToRemoveAutomatically);
-							//	nodeToRemoveAutomatically = nodeTemp;
-
-							//	//_q3.RemoveNode(nodeToRemoveAutomatically);
-							//	//nodeToRemoveAutomatically = nodeToRemoveAutomatically.GetNextNode();
-							//}
-
-							_q3.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
+							_q3.RemoveNodeSafe(nodeToRemove);
 						}
+
+						_q3.InvalidateNeighbors(avlPoint.GetPreviousNode(), avlPoint, null);
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Bottom;
 				}
 
 				//Q4
@@ -906,39 +1139,22 @@ namespace OuelletConvexHullAvl2Online
 						_q4.RootPoint = new Point(pt.X, _q4.LastPoint.Y);
 						var avlPoint = _q4.AddOrUpdate(pt);
 
-						if (avlPoint != null) // if already exists, do nothing
+						// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
+						for (; ; )
 						{
-							// Special case for top and bottom where sometimes, we should remove points between previous limit and new one.
-							for (; ; )
+							AvlNode<Point> nodeToRemove = avlPoint.GetPreviousNode();
+							if (nodeToRemove == null)
 							{
-								AvlNode<Point> nodeToRemove = avlPoint.GetPreviousNode();
-								if (nodeToRemove == null)
-								{
-									break;
-								}
-								_q4.RemoveNodeSafe(nodeToRemove);
+								break;
 							}
-
-
-							//AvlNode<Point> nodeToRemoveAutomatically = avlPoint.GetPreviousNode();
-							//while (nodeToRemoveAutomatically != null)
-							//{
-							//	AvlNode<Point> nodeTemp = nodeToRemoveAutomatically.GetPreviousNode();
-							//	_q4.RemoveNode(nodeToRemoveAutomatically);
-							//	nodeToRemoveAutomatically = nodeTemp;
-
-							//	//_q4.RemoveNode(nodeToRemoveAutomatically);
-							//	//nodeToRemoveAutomatically = nodeToRemoveAutomatically.GetPreviousNode();
-							//}
-
-							_q4.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
+							_q4.RemoveNodeSafe(nodeToRemove);
 						}
+
+						_q4.InvalidateNeighbors(null, avlPoint, avlPoint.GetNextNode());
 					}
 
-					isHullAsBeenModified = true;
+					limitAffectd |= LimitEnum.Bottom;
 				}
-
-				limitAffectd |= LimitEnum.Bottom;
 			}
 
 			if (limitAffectd != 0)
@@ -962,6 +1178,8 @@ namespace OuelletConvexHullAvl2Online
 				{
 					Bottom = pt.Y;
 				}
+
+				return 1;
 			}
 
 			//
@@ -970,24 +1188,12 @@ namespace OuelletConvexHullAvl2Online
 			// add it to its appropriate quadrant.
 			//
 
-			if (!isHullAsBeenModified) // Quadrant(s) limit changed
-			{
-				_pointsArrayForDynamicCall[0] = pt;
+			// Quadrant(s) limit did not change
+			// We call method for non disjoint quadrant because it is not worth the time to calculate if quadrant
+			// are disjoint or not, also this method is safe in both cases (disjoint or not) which is not the case 
+			// for ProcessPointsForDisjointQuadrant where some optimisation are done which require quadrant to be disjoint.
 
-				int countBefore = Count;
-
-				// We call method for non disjoint quadrant because it is not worth the time to calculate if quadrant
-				// are disjoint or not and this method is safe in both cases (disjoint or not) which is not the case 
-				// for ProcessPointsForDisjointQuadrant where some optimisation are done which require quadrant to be disjoint.
-				ProcessPointsForNotDisjointQuadrant(_pointsArrayForDynamicCall);
-
-				if (countBefore != Count)
-				{
-					isHullAsBeenModified = true;
-				}
-			}
-
-			return isHullAsBeenModified;
+			return ProcessPointForNotDisjointQuadrant(pt);
 		}
 
 		// ************************************************************************

@@ -20,7 +20,9 @@ using System.Timers;
 using System.Windows.Controls;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Loyc.Collections;
 using Mathematic;
+using OuelletConvexHullAvl2Online;
 using MarkerType = OxyPlot.MarkerType;
 
 namespace ConvexHullWorkbench
@@ -95,31 +97,6 @@ namespace ConvexHullWorkbench
 		// ******************************************************************
 		public MainWindowModel()
 		{
-			////// Create the plot model
-			////var tmp = new PlotModel {Title = "OxyPlot", Subtitle = "Sample lines"};
-
-			////// Create two line series (markers are hidden by default)
-			////var series1 = new LineSeries { Title = "Series 1", MarkerType = MarkerType.Circle };
-			////series1.Points.Add(new DataPoint(0, 0));
-			////series1.Points.Add(new DataPoint(10, 18));
-			////series1.Points.Add(new DataPoint(20, 12));
-			////series1.Points.Add(new DataPoint(30, 8));
-			////series1.Points.Add(new DataPoint(40, 15));
-
-			////var series2 = new LineSeries { Title = "Series 2", MarkerType = MarkerType.Square };
-			////series2.Points.Add(new DataPoint(0, 4));
-			////series2.Points.Add(new DataPoint(10, 12));
-			////series2.Points.Add(new DataPoint(20, 16));
-			////series2.Points.Add(new DataPoint(30, 25));
-			////series2.Points.Add(new DataPoint(40, 5));
-
-			////// Add the series to the plot model
-			////tmp.Series.Add(series1);
-			////tmp.Series.Add(series2);
-
-			// Axes are created automatically if they are not defined
-
-
 			GeneratePoints();
 			ShowPoints();
 			GenerateConvexHulls(new List<Algorithm> { AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThread] });
@@ -135,7 +112,7 @@ namespace ConvexHullWorkbench
 
 			IsCountOfPointRandom = true;
 
-			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexChan].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexChan].IsSelected = true;
 			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexLiuAndChen].IsSelected = true;
 
 			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThread].IsSelected = true;
@@ -144,15 +121,15 @@ namespace ConvexHullWorkbench
 			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayImmu].IsSelected = true;
 			////AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullSingleThreadArrayMemCpyNoIndirect].IsSelected = true;
 			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl].IsSelected = true;
-//			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2].IsSelected = true;
 
-//			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2Online].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2Online].IsSelected = true;
 			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineUse].IsSelected = true;
+			
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHull4Threads].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullMultiThreads].IsSelected = true;
 
-			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHull4Threads].IsSelected = true;
-			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullMultiThreads].IsSelected = true;
-
-			//AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullCpp].IsSelected = true;
+			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullCpp].IsSelected = true;
 		}
 
 		// ******************************************************************
@@ -251,7 +228,7 @@ namespace ConvexHullWorkbench
 		// ******************************************************************
 		public int CountOfSourcePoints
 		{
-			get { return _points.Count(); }
+			get { return Enumerable.Count(_points); }
 		}
 
 		// ******************************************************************
@@ -273,13 +250,24 @@ namespace ConvexHullWorkbench
 		public Point[] Points => _points;
 
 		// ******************************************************************
-		public void GeneratePoints()
+		public void GeneratePoints(int countOfPts = -1)
 		{
-			int qty = CountOfPoint;
+			int qty;
 
-			if (IsCountOfPointRandom)
+			if (countOfPts != -1)
 			{
-				qty = (int)((_rnd.NextDouble() * (CountOfPointMax - CountOfPointMin)) + CountOfPointMin);
+				qty = countOfPts;
+			}
+			else
+			{
+				if (IsCountOfPointRandom)
+				{
+					qty = (int)((_rnd.NextDouble() * (CountOfPointMax - CountOfPointMin)) + CountOfPointMin);
+				}
+				else
+				{
+					qty = CountOfPoint;
+				}
 			}
 
 			_points = PointGeneratorSelected.GeneratorFunc(qty);
@@ -371,7 +359,20 @@ namespace ConvexHullWorkbench
 		}
 
 		// ******************************************************************
-		public void SpeedTest(List<Algorithm> algorithms)
+		private int _countOfPointToAddSequentially = 1000;
+
+		public int CountOfPointToAddSequentially
+		{
+			get { return _countOfPointToAddSequentially; }
+			set
+			{
+				_countOfPointToAddSequentially = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		// ******************************************************************
+		public void SpeedTest(List<Algorithm> algorithms, bool isOnlineTest)
 		{
 #if DEBUG
 			if (
@@ -411,7 +412,16 @@ namespace ConvexHullWorkbench
 
 				for (Iteration = 0; Iteration < CountOfTest; Iteration++)
 				{
+					Point[] pointsToAdd = null;
+
+					if (isOnlineTest)
+					{
+						GeneratePoints(_countOfPointToAddSequentially);
+						pointsToAdd = _points;
+					}
+
 					GeneratePoints();
+
 					foreach (var algo in algorithms)
 					{
 						if (Global.IsCancel)
@@ -421,18 +431,109 @@ namespace ConvexHullWorkbench
 							return;
 						}
 
-						AlgorithmStat stat = new AlgorithmStat();
-						Stopwatch stopwatch = Stopwatch.StartNew();
+						AlgorithmStat stat;
+						Stopwatch stopwatch = new Stopwatch();
+						IReadOnlyList<Point> result = null;
+						TimeSpan timeSpanTotal = new TimeSpan();
 
-						IReadOnlyList<Point> result;
-						var algoStd = algo as AlgorithmStandard;
-						if (algoStd == null)
+						if (isOnlineTest)
 						{
-							throw new InvalidOperationException($"Stats can only be acheived on '{nameof(AlgorithmStandard)}'.");
-						}
-						result = algoStd?.Calc(_points, stat);
+							var algoStd = algo as AlgorithmStandard;
+							var algoOnline = algo as AlgorithmOnline;
 
-						stopwatch.Stop();
+							stat = new AlgorithmStat();
+							if (algoStd != null)
+							{
+								stopwatch.Reset();
+								stopwatch.Start();
+								result = algoStd.Calc(_points, stat);
+								stopwatch.Stop();
+								stat.TimeSpanCSharp = stopwatch.Elapsed;
+								timeSpanTotal += stat.BestTimeSpan;
+							}
+							else
+							{
+								stopwatch.Reset();
+								stopwatch.Start();
+								algoOnline.Init();
+								var cho = algoOnline.Algo as ConvexHullOnline;
+								foreach (Point pt in _points)
+								{
+									cho.TryAddOnePoint(pt);
+								}
+								// result = algoStd.Calc(_points, stat);
+								result = algoOnline.GetResult();
+								stopwatch.Stop();
+								timeSpanTotal += stopwatch.Elapsed;
+							}
+
+							if (algoOnline != null)
+							{
+								var cho = algoOnline.Algo as ConvexHullOnline;
+								stopwatch.Reset();
+								stopwatch.Start();
+								foreach (Point point in pointsToAdd)
+								{
+									cho.TryAddOnePoint(point);
+									result = algoOnline.GetResult();
+								}
+								stopwatch.Stop();
+
+								timeSpanTotal += stopwatch.Elapsed;
+							}
+							else
+							{
+								// Point[] newPoints = MergeArrays((Point[])result, points);
+								// Point[] newPoints = MergeArrays(points, (Point[])result);
+
+								foreach (Point point in pointsToAdd)
+								{
+									stopwatch.Reset();
+									stopwatch.Start();
+
+									Point[] hullpoints = result as Point[];
+									Array.Resize(ref hullpoints, hullpoints.Length + 1);
+
+									stopwatch.Stop();
+
+									timeSpanTotal += stopwatch.Elapsed;
+
+									stopwatch.Reset();
+									stopwatch.Start();
+
+									hullpoints[hullpoints.Length - 1] = point;
+									result = algoStd.Calc(hullpoints, stat);
+
+									stopwatch.Stop();
+									stat.TimeSpanCSharp = stopwatch.Elapsed;
+
+									timeSpanTotal += stat.BestTimeSpan;
+								}
+							}
+
+							stat.TimeSpanOriginal = timeSpanTotal;
+							stat.TimeSpanCSharp = timeSpanTotal;
+							stat.PointCount = _points.Length;
+						}
+						else // Not online
+						{
+							stat = new AlgorithmStat();
+							var algoStd = algo as AlgorithmStandard;
+							if (algoStd == null)
+							{
+								throw new InvalidOperationException($"Stats can only be acheived on '{nameof(AlgorithmStandard)}'.");
+							}
+
+							stopwatch.Reset();
+							stopwatch.Start();
+							result = algoStd?.Calc(_points, stat);
+							stopwatch.Stop();
+
+							stat.TimeSpanCSharp = stopwatch.Elapsed; //  TimeSpan.FromTicks(stopwatch.ElapsedTicks);
+							stat.PointCount = _points.Length;
+						}
+
+						stat.ResultCount = result?.Count ?? -1;
 
 						if (Global.IsCancel)
 						{
@@ -441,9 +542,6 @@ namespace ConvexHullWorkbench
 							return;
 						}
 
-						stat.TimeSpanCSharp = stopwatch.Elapsed; //  TimeSpan.FromTicks(stopwatch.ElapsedTicks);
-						stat.PointCount = _points.Length;
-						stat.ResultCount = result.Count;
 
 						Application.Current.Dispatcher.BeginInvoke(new Action(() =>
 						{
@@ -465,6 +563,16 @@ namespace ConvexHullWorkbench
 
 				AddMessage("Speed test ended.");
 			});
+		}
+
+		// ******************************************************************
+		private Point[] MergeArrays(Point[] array1, Point[] array2)
+		{
+			int count = array1.Length + array2.Length;
+			Point[] points = new Point[count];
+			Array.Copy(array1, points, array1.Length);
+			Array.Copy(array2, 0, points, array1.Length, array2.Length);
+			return points;
 		}
 
 		// ******************************************************************
@@ -723,7 +831,7 @@ namespace ConvexHullWorkbench
 
 						if (diffs.HasErrors)
 						{
-							diffs.PointsRef.ForEach(pt => Debug.Print($"Pt: {pt}"));
+							EnumerableExtensions.ForEach(diffs.PointsRef, pt => Debug.Print($"Pt: {pt}"));
 
 							var tmp = new PlotModel { Title = "Convex Hull differences", Subtitle = "using OxyPlot" };
 

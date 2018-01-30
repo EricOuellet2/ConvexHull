@@ -30,6 +30,11 @@ namespace General.AvlTreeSet
 		// ******************************************************************
 		public AvlTreeSet(IComparer<T> comparer)
 		{
+			if (comparer == null)
+			{
+				throw new ArgumentNullException($"{nameof(comparer)} can't be null");
+			}
+			
 			_comparer = comparer;
 			_enumerableWrapper = new EnumerableWrapper<AvlNode<T>>(() => new AvlNodeEnumerator<T>(this));
 			_enumerableWrapperReverse = new EnumerableWrapper<AvlNode<T>>(() => new AvlNodeEnumeratorReverse<T>(this));
@@ -200,8 +205,6 @@ namespace General.AvlTreeSet
 			_root = new AvlNode<T> { Item = item };
 			_count++;
 
-			DebugEnsureTreeIsValid();
-
 			return _root;
 		}
 
@@ -255,8 +258,6 @@ namespace General.AvlTreeSet
 
 			_root = new AvlNode<T> { Item = item };
 			_count++;
-
-			DebugEnsureTreeIsValid();
 
 			return _root;
 		}
@@ -736,82 +737,6 @@ namespace General.AvlTreeSet
 				}
 
 				node = parent;
-			}
-		}
-
-		// ******************************************************************
-		/// <summary>
-		/// EO: Rebalance any node wich has become unbalanced.
-		/// Could be called from a node with a newly added child or a parent of a newly deleted node.
-		/// It will rebalance the tree up the root without being recursive (it will be done iteratively for better performance)
-		/// </summary>
-		/// <param name="node">Newly unbalanced node</param>
-		protected void BalanceTree(AvlNode<T> node) // nodeWhichRequireRecalcOfBalance)
-		{
-			while (node != null)
-			{
-				int balance;
-				if (node.Left == null)
-				{
-					if (node.Right == null)
-					{
-						balance = 0;
-					}
-					else
-					{
-						balance = 1 + node.Right.Balance;
-					}
-				}
-				else
-				{
-					if (node.Right == null)
-					{
-						balance = -1 + node.Left.Balance;
-					}
-					else
-					{
-						balance = node.Left.Balance -  node.Right.Balance;
-					}
-				}
-				
-				if (balance == 2)
-				{
-					if (node.Left.Balance >= 0)
-					{
-						node = RotateRight(node);
-
-						if (node.Balance == -1)
-						{
-							return;
-						}
-					}
-					else
-					{
-						node = RotateLeftRight(node);
-					}
-				}
-				else if (balance == -2)
-				{
-					if (node.Right.Balance <= 0)
-					{
-						node = RotateLeft(node);
-
-						if (node.Balance == 1)
-						{
-							return;
-						}
-					}
-					else
-					{
-						node = RotateRightLeft(node);
-					}
-				}
-				else
-				{
-					node.Balance = balance;
-				}
-
-				node = node.Parent;
 			}
 		}
 
@@ -1323,8 +1248,8 @@ namespace General.AvlTreeSet
 		[DebuggerHidden]
 		private void RecursiveEnsureNodeBalanceIsValid(AvlNode<T> node)
 		{
-			int leftHeight = RecursiveGetChildMaxHeight(node.Left);
-			int rightHeight = RecursiveGetChildMaxHeight(node.Right);
+			int leftHeight = GetMaxHeightRecursive(node.Left);
+			int rightHeight = GetMaxHeightRecursive(node.Right);
 
 			if (leftHeight == 0)
 			{
@@ -1397,7 +1322,7 @@ namespace General.AvlTreeSet
 		}
 
 		// ************************************************************************
-		private int RecursiveGetChildMaxHeight(AvlNode<T> node)
+		private int GetMaxHeightRecursive(AvlNode<T> node)
 		{
 			if (node == null)
 			{
@@ -1407,13 +1332,13 @@ namespace General.AvlTreeSet
 			int leftHeight = 0;
 			if (node.Left != null)
 			{
-				leftHeight = RecursiveGetChildMaxHeight(node.Left);
+				leftHeight = GetMaxHeightRecursive(node.Left);
 			}
 
 			int rightHeight = 0;
 			if (node.Right != null)
 			{
-				rightHeight = RecursiveGetChildMaxHeight(node.Right);
+				rightHeight = GetMaxHeightRecursive(node.Right);
 			}
 
 			return 1 + Math.Max(leftHeight, rightHeight);

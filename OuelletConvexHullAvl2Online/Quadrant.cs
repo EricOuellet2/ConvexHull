@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace OuelletConvexHullAvl2Online
 		// ************************************************************************
 		protected Quadrant()
 		{
-			
+
 		}
 
 		// ************************************************************************
@@ -80,17 +81,20 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ************************************************************************
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal abstract int IsHullPoint(ref Point point);
+
+		// ************************************************************************
 		/// <summary>
 		/// Tell if should try to add and where. -1 ==> Should not add.
 		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <returns></returns>
-		internal abstract void ProcessPoint(ref Point point);
+		/// <param name="point"></param>
+		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>
+		internal abstract int ProcessPoint(ref Point point);
 
-		// ************************************************************************
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract bool IsGoodQuadrantForPoint(Point pt);
+		//// ************************************************************************
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//protected abstract bool IsGoodQuadrantForPoint(Point pt);
 
 		// ************************************************************************
 		// protected abstract bool CanQuickReject(Point pt, Point ptHull);
@@ -111,7 +115,7 @@ namespace OuelletConvexHullAvl2Online
 			if (pointPrevious != null)
 			{
 				AvlNode<Point> previousPrevious = pointPrevious.GetPreviousNode();
-				for (;;)
+				for (; ; )
 				{
 					if (previousPrevious == null)
 					{
@@ -135,7 +139,7 @@ namespace OuelletConvexHullAvl2Online
 			if (pointNext != null)
 			{
 				AvlNode<Point> nextNext = pointNext.GetNextNode();
-				for (;;)
+				for (; ; )
 				{
 					if (nextNext == null)
 					{
@@ -159,7 +163,7 @@ namespace OuelletConvexHullAvl2Online
 
 		// ************************************************************************
 		public abstract Quadrant Clone();
-		
+
 		// ************************************************************************
 		public void CopyTo(Quadrant q)
 		{
@@ -202,12 +206,12 @@ namespace OuelletConvexHullAvl2Online
 			{
 				return false;
 			}
-			
+
 			if (!base.Equals(q))
 			{
 				return false;
 			}
-			
+
 			return true;
 		}
 
@@ -221,7 +225,7 @@ namespace OuelletConvexHullAvl2Online
 		// ************************************************************************
 		public void DumpVisual()
 		{
-			base.DumpVisual(Name);	
+			base.DumpVisual(Name);
 		}
 
 		// ************************************************************************

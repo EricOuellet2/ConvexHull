@@ -106,7 +106,7 @@ namespace ConvexHullWorkbench
 			MessageBox.Show("In order to get proper results, you should run this test in 'Release'");
 #endif
 
-			Model.SpeedTest(Model.GetSelectedAlgorithms());
+			Model.SpeedTest(Model.GetSelectedAlgorithms(), false);
 		}
 
 		// ******************************************************************
@@ -531,40 +531,40 @@ namespace ConvexHullWorkbench
 		// ******************************************************************
 		private void TestOnlineConvexHull(object sender, RoutedEventArgs e)
 		{
-			AlgorithmOnline _algoOnlineSelected = null;
-			int count = 0;
+			//AlgorithmOnline _algoOnlineSelected = null;
+			//int count = 0;
 
-			foreach (var algo in Model.AlgorithmManager.Algorithms)
-			{
-				if (algo.AlgorithmType == AlgorithmType.ConvexHullOnline)
-				{
-					_algoOnlineSelected = algo as AlgorithmOnline;
-					count++;
-				}
-			}
+			//foreach (var algo in Model.AlgorithmManager.Algorithms)
+			//{
+			//	if (algo.AlgorithmType == AlgorithmType.ConvexHullOnline)
+			//	{
+			//		_algoOnlineSelected = algo as AlgorithmOnline;
+			//		count++;
+			//	}
+			//}
 
-			if (count != 1 || _algoOnlineSelected == null)
-			{
-				MessageBox.Show("You should select one and only one Convex Hull Online algorithm");
-				return;
-			}
+			//if (count != 1 || _algoOnlineSelected == null)
+			//{
+			//	MessageBox.Show("You should select one and only one Convex Hull Online algorithm");
+			//	return;
+			//}
 
-			Model.GeneratePoints();
+			//Model.GeneratePoints();
 
-			var algoOnlineStat = new AlgorithmStat();
+			//var algoOnlineStat = new AlgorithmStat();
 
-			Model.PlotModel.Series.Clear();
-			var oxyPlotSeries = new LineSeries { Title = _algoOnlineSelected.Name, MarkerType = MarkerType.Square, MarkerFill = _algoOnlineSelected.Color };
+			//Model.PlotModel.Series.Clear();
+			//var oxyPlotSeries = new LineSeries { Title = _algoOnlineSelected.Name, MarkerType = MarkerType.Square, MarkerFill = _algoOnlineSelected.Color };
 
-			// ici manque les points dans la series
+			//// ici manque les points dans la series
 
-			Model.PlotModel.Series.Insert(0, oxyPlotSeries);
+			//Model.PlotModel.Series.Insert(0, oxyPlotSeries);
 
-			Model.AddMessage($"Starting online test.");
+			//Model.AddMessage($"Starting online test.");
 
-			_algoOnlineSelected.Init();
+			//_algoOnlineSelected.Init();
 
-			AddAnotherPointAsync(_algoOnlineSelected, algoOnlineStat, 0, oxyPlotSeries);
+			//AddAnotherPointAsync(_algoOnlineSelected, algoOnlineStat, 0, oxyPlotSeries);
 		}
 
 		// ******************************************************************
@@ -688,6 +688,10 @@ namespace ConvexHullWorkbench
 		}
 		
 		// ************************************************************************
+		/// <summary>
+		/// Test for online convex hull
+		/// </summary>
+		/// <param name="testSet"></param>
 		private void ExecuteOneSetOfTest(TestSetOfPoint testSet)
 		{
 			OuelletConvexHullAvl2Online.ConvexHullOnline ch;
@@ -705,7 +709,7 @@ namespace ConvexHullWorkbench
 					{
 						foreach (Point pt in points)
 						{
-							ch.DynamicallyAddAnotherPointToConvexHullIfAppropriate(pt);
+							ch.TryAddOnePoint(pt);
 
 							this.Dispatcher.BeginInvoke(new Action(() => DrawPoints(
 								new DrawInfo(testSet.Points, DrawStyle.Point, OxyColors.Aqua),
@@ -761,6 +765,17 @@ namespace ConvexHullWorkbench
 			}
 
 			Model.PlotModel.PlotView?.InvalidatePlot();
+		}
+
+		// ************************************************************************
+		private void SpeedTestOnlineClick(object sender, RoutedEventArgs e)
+		{
+#if DEBUG
+			MessageBox.Show("In order to get proper results, you should run this test in 'Release'");
+#endif
+
+			Model.SpeedTest(Model.GetSelectedAlgorithms(), true);
+
 		}
 
 		// ************************************************************************
