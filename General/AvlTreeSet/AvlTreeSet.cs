@@ -133,26 +133,7 @@ namespace General.AvlTreeSet
 		// ******************************************************************
 		public bool Contains(T item)
 		{
-			AvlNode<T> node = _root;
-
-			while (node != null)
-			{
-				int compareResult = _comparer.Compare(item, node.Item);
-				if (compareResult < 0)
-				{
-					node = node.Left;
-				}
-				else if (compareResult > 0)
-				{
-					node = node.Right;
-				}
-				else
-				{
-					return true;
-				}
-			}
-
-			return false;
+			return GetNode(item) != null;
 		}
 
 		// ******************************************************************

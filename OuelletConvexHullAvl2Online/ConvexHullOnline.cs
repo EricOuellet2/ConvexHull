@@ -29,28 +29,21 @@ namespace OuelletConvexHullAvl2Online
 
 		internal bool IsInitDone { get; set; } = false;
 
-		private IReadOnlyList<Point> _listOfPoint;
+		// ******************************************************************
+		private static Point[] _emptyListOfPoint = new Point[0];
 
 		// ******************************************************************
-		public ConvexHullOnline()
+		private void Init(IReadOnlyList<Point> points)
 		{
-		}
+			if (points == null)
+			{
+				points = _emptyListOfPoint;
+			}
 
-		// ******************************************************************
-		public ConvexHullOnline(IReadOnlyList<Point> listOfPoint) : this()
-		{
-			Init(listOfPoint);
-		}
-
-		// ******************************************************************
-		private void Init(IReadOnlyList<Point> listOfPoint)
-		{
-			_listOfPoint = listOfPoint;
-
-			_q1 = new QuadrantSpecific1(_listOfPoint);
-			_q2 = new QuadrantSpecific2(_listOfPoint);
-			_q3 = new QuadrantSpecific3(_listOfPoint);
-			_q4 = new QuadrantSpecific4(_listOfPoint);
+			_q1 = new QuadrantSpecific1(points);
+			_q2 = new QuadrantSpecific2(points);
+			_q3 = new QuadrantSpecific3(points);
+			_q4 = new QuadrantSpecific4(points);
 
 			_quadrants = new Quadrant[] { _q1, _q2, _q3, _q4 };
 
@@ -85,50 +78,40 @@ namespace OuelletConvexHullAvl2Online
 
 		// ******************************************************************
 		/// <summary>
-		/// 
+		/// Will reset any previous data, if any, and calculate a convex hull based on points.
+		/// Results are kept per quadrant. To get result, either see: GetResultsAsArrayOfPoint or
+		/// GetEnumerator
 		/// </summary>
-		/// <param name="threadUsage">Using ConvexHullThreadUsage.All will only use all thread for the first pass (se quadrant limits) then use only 4 threads for pass 2 (which is the actual limit).</param>
-		public void CalcConvexHull()
+		public void CalcConvexHull(IReadOnlyList<Point> points)
 		{
-			if (!IsInitDone)
-			{
-				throw new InvalidOperationException($"To calc convex hull, the class should have be initialized with points, either by the constructor or method: '{nameof(Init)}'");
-			}
+			Init(points);
 
-			if (IsZeroData())
+			if (points == null || !points.Any())
 			{
 				return;
 			}
 
-			SetQuadrantLimitsOneThread();
+			SetQuadrantLimitsOneThread(points);
 
 			_q1.Prepare();
 			_q2.Prepare();
 			_q3.Prepare();
 			_q4.Prepare();
 
-			// Main Loop to extract ConvexHullPoints
-			Point[] points = _listOfPoint as Point[];
-
-			if (points != null)
+			if (IsQuadrantAreDisjoint())
 			{
-				Point point;
-
-				if (IsQuadrantAreDisjoint())
-				{
-					Debug.Print("Disjoint");
-					ProcessPointsForDisjointQuadrant(points);
-				}
-				else // Not disjoint ***********************************************************************************
-				{
-					Debug.Print("Not disjoint");
-					ProcessPointsForNotDisjointQuadrant(points);
-				}
+				Debug.Print("Disjoint");
+				ProcessPointsForDisjointQuadrant(points);
+			}
+			else
+			{
+				Debug.Print("Not disjoint");
+				ProcessPointsForNotDisjointQuadrant(points);
 			}
 		}
 
 		// ************************************************************************
-		private void ProcessPointsForDisjointQuadrant(Point[] points)
+		private void ProcessPointsForDisjointQuadrant(IReadOnlyList<Point> points)
 		{
 			Point point;
 			Point q1Root = _q1.RootPoint;
@@ -137,7 +120,7 @@ namespace OuelletConvexHullAvl2Online
 			Point q4Root = _q4.RootPoint;
 
 			int index = 0;
-			int pointCount = points.Length;
+			int pointCount = points.Count;
 
 			// ****************** Q1
 			Q1First:
@@ -293,7 +276,7 @@ namespace OuelletConvexHullAvl2Online
 
 		// ************************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void ProcessPointsForNotDisjointQuadrant(Point[] points)
+		private void ProcessPointsForNotDisjointQuadrant(IReadOnlyList<Point> points)
 		{
 			Point point;
 			Point q1Root = _q1.RootPoint;
@@ -302,7 +285,7 @@ namespace OuelletConvexHullAvl2Online
 			Point q4Root = _q4.RootPoint;
 
 			int index = 0;
-			int pointCount = points.Length;
+			int pointCount = points.Count;
 
 			// ****************** Q1
 			Q1First:
@@ -604,12 +587,14 @@ namespace OuelletConvexHullAvl2Online
 
 		// ************************************************************************
 		/// <summary>
-		/// 
+		/// This function is called after a Point has been verified to be inside
+		/// quadrant limits. When it is the case, it chcek if the point would 
+		/// be participating to the convex hull if it would be added (but it is not).
 		/// </summary>
 		/// <param name="point"></param>
 		/// <returns>1 = hull point, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int IsHullPointInsideLimit(Point point)
+		private int EvaluatePointForPointInsideQuadrantLimits(Point point)
 		{
 			int result;
 
@@ -676,7 +661,7 @@ namespace OuelletConvexHullAvl2Online
 
 		// ************************************************************************
 		/// <summary>
-		/// 
+		/// Try to insert a point into the proper quadrant (if appropriate).
 		/// </summary>
 		/// <param name="point"></param>
 		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
@@ -762,8 +747,55 @@ namespace OuelletConvexHullAvl2Online
 		private Point[] _pointsArrayForDynamicCall = new Point[1];
 
 		// ******************************************************************
-		static private int _iteration = 0;
+		/// <summary>
+		/// Chck if a point is already part of the Convex Hull.
+		/// In other word, it checks to see if the point is a duplicate.
+		/// Usefull??? Not sure?
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns>true if the point already exists, false otherwise</returns>
+		public bool IsExists(Point pt)
+		{
+			if (pt.X >= _q1.RootPoint.X && pt.Y >= _q1.RootPoint.Y)
+			{
+				if (_q1.Contains(pt))
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (pt.X <= _q2.RootPoint.X && pt.Y >= _q2.RootPoint.Y)
+				{
+					if (_q2.Contains(pt))
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (pt.X <= _q3.RootPoint.X && pt.Y <= _q3.RootPoint.Y)
+					{
+						if (_q3.Contains(pt))
+						{
+							return true;
+						}
+					}
+					else
+					{
+						if (pt.X >= _q4.RootPoint.X && pt.Y <= _q4.RootPoint.Y)
+						{
+							if (_q4.Contains(pt))
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
 
+			return false;
+		}
 
 		/// <summary>
 		/// Verify if a point would be added or not as a part of the 
@@ -772,7 +804,7 @@ namespace OuelletConvexHullAvl2Online
 		/// keep best performance)
 		/// </summary>
 		/// <param name="pt"></param>
-		/// <returns>Return true if added, false otherwise</returns>
+		/// <returns>-1 point already exists, 0 point not part of the convex hull, 1 point will be added if asked for</returns>
 		public int Evaluate(Point pt)
 		{
 			if (!IsInitDone)
@@ -902,7 +934,7 @@ namespace OuelletConvexHullAvl2Online
 				return 1;
 			}
 
-			return IsHullPointInsideLimit(pt);
+			return EvaluatePointForPointInsideQuadrantLimits(pt);
 		}
 
 		// ************************************************************************
@@ -912,7 +944,7 @@ namespace OuelletConvexHullAvl2Online
 		/// keep best performance)
 		/// </summary>
 		/// <param name="pt"></param>
-		/// <returns>Return true if added, false otherwise</returns>
+		/// <returns>-1 point already exists, 0 point not part of the convex hull, 1 point added</returns>
 		public int TryAddOnePoint(Point pt)
 		{
 			if (!IsInitDone)
@@ -920,7 +952,7 @@ namespace OuelletConvexHullAvl2Online
 				_pointsArrayForDynamicCall[0] = pt;
 				Init(_pointsArrayForDynamicCall);
 
-				SetQuadrantLimitsOneThread();
+				SetQuadrantLimitsOneThread(_pointsArrayForDynamicCall);
 
 				_q1.Prepare();
 				_q2.Prepare();
@@ -1215,9 +1247,9 @@ namespace OuelletConvexHullAvl2Online
 		#endregion
 
 		// ************************************************************************
-		private void SetQuadrantLimitsOneThread()
+		private void SetQuadrantLimitsOneThread(IReadOnlyList<Point> points)
 		{
-			Point ptFirst = this._listOfPoint.First();
+			Point ptFirst = points.First();
 
 			// Find the quadrant limits (maximum x and y)
 
@@ -1227,7 +1259,7 @@ namespace OuelletConvexHullAvl2Online
 			double top, rightTop, rightBottom, bottom, leftTop, leftBottom;
 			top = rightTop = rightBottom = bottom = leftTop = leftBottom = ptFirst.Y;
 
-			foreach (Point pt in _listOfPoint)
+			foreach (Point pt in points)
 			{
 				if (pt.X >= right)
 				{
@@ -1348,9 +1380,9 @@ namespace OuelletConvexHullAvl2Online
 		// ******************************************************************
 		// For usage of Parallel func, I highly suggest: Stephen Toub: Patterns of parallel programming ==> Just Awsome !!!
 		// But its only my own fault if I'm not using it at its full potential...
-		private void SetQuadrantLimitsUsingAllThreads()
+		private void SetQuadrantLimitsUsingAllThreads(IReadOnlyList<Point> points)
 		{
-			Point pt = this._listOfPoint.First();
+			Point pt = points.First();
 			_limit = new Limit(pt);
 
 			int coreCount = Environment.ProcessorCount;
@@ -1362,7 +1394,7 @@ namespace OuelletConvexHullAvl2Online
 				tasks[n] = Task.Factory.StartNew(() =>
 				{
 					Limit limit = _limit.Copy();
-					FindLimits(_listOfPoint, nLocal, coreCount, limit);
+					FindLimits(points, nLocal, coreCount, limit);
 					AggregateLimits(limit);
 				});
 			}
@@ -1578,197 +1610,13 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ******************************************************************
-		private Limit FindLimits(Point pt, ParallelLoopState state, Limit limit)
-		{
-			double x = pt.X;
-			double y = pt.Y;
-
-			// Top
-			if (y >= limit.Q2Top.Y)
-			{
-				if (y == limit.Q2Top.Y) // Special
-				{
-					if (y == limit.Q1Top.Y)
-					{
-						if (x < limit.Q2Top.X)
-						{
-							limit.Q2Top.X = x;
-						}
-						else if (x > limit.Q1Top.X)
-						{
-							limit.Q1Top.X = x;
-						}
-					}
-					else
-					{
-						if (x < limit.Q2Top.X)
-						{
-							limit.Q1Top.X = limit.Q2Top.X;
-							limit.Q1Top.Y = limit.Q2Top.Y;
-
-							limit.Q2Top.X = x;
-						}
-						else if (x > limit.Q1Top.X)
-						{
-							limit.Q1Top.X = x;
-							limit.Q1Top.Y = y;
-						}
-					}
-				}
-				else
-				{
-					limit.Q2Top.X = x;
-					limit.Q2Top.Y = y;
-				}
-			}
-
-			// Bottom
-			if (y <= limit.Q3Bottom.Y)
-			{
-				if (y == limit.Q3Bottom.Y) // Special
-				{
-					if (y == limit.Q4Bottom.Y)
-					{
-						if (x < limit.Q3Bottom.X)
-						{
-							limit.Q3Bottom.X = x;
-						}
-						else if (x > limit.Q4Bottom.X)
-						{
-							limit.Q4Bottom.X = x;
-						}
-					}
-					else
-					{
-						if (x < limit.Q3Bottom.X)
-						{
-							limit.Q4Bottom.X = limit.Q3Bottom.X;
-							limit.Q4Bottom.Y = limit.Q3Bottom.Y;
-
-							limit.Q3Bottom.X = x;
-						}
-						else if (x > limit.Q3Bottom.X)
-						{
-							limit.Q4Bottom.X = x;
-							limit.Q4Bottom.Y = y;
-						}
-					}
-				}
-				else
-				{
-					limit.Q3Bottom.X = x;
-					limit.Q3Bottom.Y = y;
-				}
-			}
-
-			// Right
-			if (x >= limit.Q4Right.X)
-			{
-				if (x == limit.Q4Right.X) // Special
-				{
-					if (x == limit.Q1Right.X)
-					{
-						if (y < limit.Q4Right.Y)
-						{
-							limit.Q4Right.Y = y;
-						}
-						else if (y > limit.Q1Right.Y)
-						{
-							limit.Q1Right.Y = y;
-						}
-					}
-					else
-					{
-						if (y < limit.Q4Right.Y)
-						{
-							limit.Q1Right.X = limit.Q4Right.X;
-							limit.Q1Right.Y = limit.Q4Right.Y;
-
-							limit.Q4Right.Y = y;
-						}
-						else if (y > limit.Q1Right.Y)
-						{
-							limit.Q1Right.X = x;
-							limit.Q1Right.Y = y;
-						}
-					}
-				}
-				else
-				{
-					limit.Q4Right.X = x;
-					limit.Q4Right.Y = y;
-				}
-			}
-
-			// Left
-			if (x <= limit.Q3Left.X)
-			{
-				if (x == limit.Q3Left.X) // Special
-				{
-					if (x == limit.Q2Left.X)
-					{
-						if (y < limit.Q3Left.Y)
-						{
-							limit.Q3Left.Y = y;
-						}
-						else if (y > limit.Q2Left.Y)
-						{
-							limit.Q2Left.Y = y;
-						}
-					}
-					else
-					{
-						if (y < limit.Q3Left.Y)
-						{
-							limit.Q2Left.X = limit.Q3Left.X;
-							limit.Q2Left.Y = limit.Q3Left.Y;
-
-							limit.Q3Left.Y = y;
-						}
-						else if (y > limit.Q2Left.Y)
-						{
-							limit.Q2Left.X = x;
-							limit.Q2Left.Y = y;
-						}
-					}
-				}
-				else
-				{
-					limit.Q3Left.X = x;
-					limit.Q3Left.Y = y;
-				}
-			}
-
-			if (limit.Q2Left.X != limit.Q3Left.X)
-			{
-				limit.Q2Left.X = limit.Q3Left.X;
-				limit.Q2Left.Y = limit.Q3Left.Y;
-			}
-
-			if (limit.Q1Right.X != limit.Q4Right.X)
-			{
-				limit.Q1Right.X = limit.Q4Right.X;
-				limit.Q1Right.Y = limit.Q4Right.Y;
-			}
-
-			if (limit.Q1Top.Y != limit.Q2Top.Y)
-			{
-				limit.Q1Top.X = limit.Q2Top.X;
-				limit.Q1Top.Y = limit.Q2Top.Y;
-			}
-
-			if (limit.Q4Bottom.Y != limit.Q3Bottom.Y)
-			{
-				limit.Q4Bottom.X = limit.Q3Bottom.X;
-				limit.Q4Bottom.Y = limit.Q3Bottom.Y;
-			}
-
-			return limit;
-		}
-
-		// ******************************************************************
 		private object _findLimitFinalLock = new object();
 
+		/// <summary>
+		/// Utility function to calculate used when determining limits in a 
+		/// multithreaded way.
+		/// </summary>
+		/// <param name="limit"></param>
 		private void AggregateLimits(Limit limit)
 		{
 			lock (_findLimitFinalLock)
@@ -1896,6 +1744,10 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ************************************************************************
+		/// <summary>
+		/// Return the count of convex hull points. That is the raw number of point.
+		/// There is no additional point added to close the Convex Hull.
+		/// </summary>
 		public int Count
 		{
 			get
@@ -1942,6 +1794,12 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ******************************************************************
+		/// <summary>
+		/// Create an array with the result of the convex hull which is stored 
+		/// into a tree for each quadrant.
+		/// </summary>
+		/// <param name="shouldCloseTheGraph"></param>
+		/// <returns></returns>
 		public Point[] GetResultsAsArrayOfPoint(bool shouldCloseTheGraph = true)
 		{
 			int countOfPoints = Count;
@@ -2006,12 +1864,6 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ******************************************************************
-		private bool IsZeroData()
-		{
-			return _listOfPoint == null || !_listOfPoint.Any();
-		}
-
-		// ******************************************************************
 		public void Dump()
 		{
 			Debug.Print("Q1:");
@@ -2025,12 +1877,34 @@ namespace OuelletConvexHullAvl2Online
 		}
 
 		// ******************************************************************
+		/// <summary>
+		/// This will provide an iterator adapter wrapper which could be use 
+		/// to iterate over each convex hull result values. 
+		/// Please note. That it is could for one use, but to read result many
+		/// times, it is recommanded to use GetResultsAsArrayOfPoint in order 
+		/// to get an array copy of the convex hull result and iterate over it.
+		/// Otherwise, some performance penalty could occur due to the fact 
+		/// the iterator has to iterate over each quadrant tree which imply 
+		/// some slowness in regard to an iterating over an array.
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerator<Point> GetEnumerator()
 		{
 			return new ConvexHullEnumerator(this);
 		}
 
 		// ******************************************************************
+		/// <summary>
+		/// This will provide an iterator adapter wrapper which could be use 
+		/// to iterate over each convex hull result values. 
+		/// Please note. That it is could for one use, but to read result many
+		/// times, it is recommanded to use GetResultsAsArrayOfPoint in order 
+		/// to get an array copy of the convex hull result and iterate over it.
+		/// Otherwise, some performance penalty could occur due to the fact 
+		/// the iterator has to iterate over each quadrant tree which imply 
+		/// some slowness in regard to an iterating over an array.
+		/// </summary>
+		/// <returns></returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new ConvexHullEnumerator(this);

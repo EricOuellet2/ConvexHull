@@ -241,8 +241,8 @@ namespace ConvexHullWorkbench
 				"Eric Ouellet, Eric Ouellet", "Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkCyan,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline(points);
-					convexHullOnline.CalcConvexHull();
+					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline();
+					convexHullOnline.CalcConvexHull(points);
 					return convexHullOnline.GetResultsAsArrayOfPoint();
 				}));
 
