@@ -387,7 +387,17 @@ namespace ConvexHullWorkbench
 
 			Dictionary<Algorithm, ScatterSeries> algoToSeries = new Dictionary<Algorithm, ScatterSeries>();
 
-			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"Speed Test for {SelectedGeneratorDescription}" };
+			string onlineTest = null;
+			if (isOnlineTest)
+			{
+				onlineTest = $" (online merge {CountOfPointToAddSequentially}x)";
+			}
+			else
+			{
+				onlineTest = "";
+			}
+			
+			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"Speed Test for {onlineTest} {SelectedGeneratorDescription}" };
 
 			SetOxyPlotDefaultColorPalette(tmp);
 

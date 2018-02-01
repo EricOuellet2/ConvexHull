@@ -766,13 +766,14 @@ namespace OuelletConvexHullAvl2Online
 
 
 		/// <summary>
-		/// Will add another point to the convex hull if appropriate.
-		/// "Init" should have been called prior to use this method.
-		/// Duplication of code (partial or complete is intentional in order to save some call)
+		/// Verify if a point would be added or not as a part of the 
+		/// current convex hull solution. 
+		/// Duplication of code (partial or complete is intentional in order 
+		/// keep best performance)
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>Return true if added, false otherwise</returns>
-		public int IsHullPoint(Point pt)
+		public int Evaluate(Point pt)
 		{
 			if (!IsInitDone)
 			{
@@ -907,8 +908,8 @@ namespace OuelletConvexHullAvl2Online
 		// ************************************************************************
 		/// <summary>
 		/// Will add another point to the convex hull if appropriate.
-		/// "Init" should have been called prior to use this method.
-		/// Duplication of code (partial or complete is intentional in order to save some call)
+		/// Duplication of code (partial or complete is intentional in order 
+		/// keep best performance)
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>Return true if added, false otherwise</returns>
