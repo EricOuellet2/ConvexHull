@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using General.AvlTreeSet;
+using OuelletConvexHullAvl3.AvlTreeSet;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
 	public class QuadrantSpecific1 : Quadrant
 	{
@@ -13,7 +13,7 @@ namespace OuelletConvexHullAvl2Online
 		public const string QuadrantName = "Quadrant 1";
 
 		// ************************************************************************
-		public QuadrantSpecific1(ConvexHullOnline convexHull, IReadOnlyList<Point> listOfPoint) : base(convexHull, listOfPoint, new Q1Comparer())
+		public QuadrantSpecific1(ConvexHull convexHull, IReadOnlyList<Point> listOfPoint) : base(convexHull, listOfPoint, new Q1Comparer())
 		{
 			Name = QuadrantName;
 		}
@@ -321,13 +321,13 @@ namespace OuelletConvexHullAvl2Online
 		// ******************************************************************
 		internal override Quadrant GetNextQuadrant()
 		{
-			return _convexHullOnline._q2;
+			return ConvexHull._q2;
 		}
 
 		// ******************************************************************
 		internal override Quadrant GetPreviousQuadrant()
 		{
-			return _convexHullOnline._q4;
+			return ConvexHull._q4;
 		}
 
 		// ******************************************************************

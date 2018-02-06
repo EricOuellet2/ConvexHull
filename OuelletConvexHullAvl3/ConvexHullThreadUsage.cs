@@ -1,5 +1,5 @@
 ﻿
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
 	public enum ConvexHullThreadUsageAvl
 	{

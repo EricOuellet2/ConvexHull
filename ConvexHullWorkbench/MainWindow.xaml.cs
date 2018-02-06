@@ -25,10 +25,11 @@ using System.Windows.Threading;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using OuelletConvexHullArray;
-using OuelletConvexHullAvl2Online;
+using OuelletConvexHullAvl3;
 using OxyPlot.Series;
 //using OxyPlot.Series;
 using Unsafe;
+using ConvexHull = OuelletConvexHullAvl3.ConvexHull;
 using Point = System.Windows.Point;
 
 namespace ConvexHullWorkbench
@@ -242,7 +243,7 @@ namespace ConvexHullWorkbench
 			points.Add(new Point(3,3));
 			points.Add(new Point(6, 3));
 
-			ConvexHullOnline ch = new ConvexHullOnline();
+			ConvexHull ch = new ConvexHull();
 			ch.CalcConvexHull(points);
 
 			var diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
@@ -256,11 +257,11 @@ namespace ConvexHullWorkbench
 
 
 			points = new List<Point>();
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			points.Add(new Point(3, 5));
 			points.Add(new Point(3, 3));
 
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			ch.CalcConvexHull(points);
 
 			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
@@ -275,11 +276,11 @@ namespace ConvexHullWorkbench
 
 
 			points = new List<Point>();
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			points.Add(new Point(3, 3));
 			points.Add(new Point(3,5));
 
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			ch.CalcConvexHull(points);
 
 			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
@@ -292,10 +293,10 @@ namespace ConvexHullWorkbench
 
 
 			points = new List<Point>();
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			points.Add(new Point(3, 3));
 
-			ch = new ConvexHullOnline();
+			ch = new ConvexHull();
 			ch.CalcConvexHull(points);
 
 			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
@@ -311,7 +312,7 @@ namespace ConvexHullWorkbench
 				{
 					Model.GeneratePoints();
 
-					ch = new ConvexHullOnline();
+					ch = new ConvexHull();
 					ch.CalcConvexHull(Model.Points);
 					ch.CheckNextNodePreviousNodeCoherence();
 
@@ -781,7 +782,7 @@ namespace ConvexHullWorkbench
 		/// <param name="testSet"></param>
 		private void ExecuteOneSetOfTest(TestSetOfPoint testSet)
 		{
-			OuelletConvexHullAvl2Online.ConvexHullOnline ch;
+			ConvexHull ch;
 
 			Permutations.ForAllPermutation(testSet.Points, points =>
 			{
@@ -790,7 +791,7 @@ namespace ConvexHullWorkbench
 				{
 					isIntergrityExceptionHappen = false;
 
-					ch = new OuelletConvexHullAvl2Online.ConvexHullOnline();
+					ch = new ConvexHull();
 
 					try
 					{

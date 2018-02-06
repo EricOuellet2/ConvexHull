@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using System.Windows;
 using General.AvlTreeSet;
-using OuelletConvexHullAvl2Online;
+using OuelletConvexHullAvl3.AvlTreeSet;
+using OuelletConvexHullAvl3.Util;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
 	// ******************************************************************
-	public class ConvexHullOnline : IReadOnlyCollection<Point>
+	public class ConvexHull : IReadOnlyCollection<Point>
 	{
 		// Quadrant: Q2 | Q1
 		//	         -------

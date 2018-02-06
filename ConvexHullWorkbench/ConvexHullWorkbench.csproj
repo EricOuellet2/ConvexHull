@@ -265,13 +265,13 @@
       <Project>{3becb981-fe49-403b-a625-2b6f7519c59a}</Project>
       <Name>OuelletConvexHullArray</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OuelletConvexHullAvl2Online\OuelletConvexHullAvl2Online.csproj">
-      <Project>{6c9d4f92-4f35-47c2-ae6f-e631acc6b7e1}</Project>
-      <Name>OuelletConvexHullAvl2Online</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OuelletConvexHullAvl2\OuelletConvexHullAvl2.csproj">
       <Project>{9f6db41f-5841-425f-b1c2-6ad623aa7774}</Project>
       <Name>OuelletConvexHullAvl2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OuelletConvexHullAvl3\OuelletConvexHullAvl3.csproj">
+      <Project>{6c9d4f92-4f35-47c2-ae6f-e631acc6b7e1}</Project>
+      <Name>OuelletConvexHullAvl3</Name>
     </ProjectReference>
     <ProjectReference Include="..\OuelletConvexHullAvl\OuelletConvexHullAvl.csproj">
       <Project>{f3877bb4-f4d1-41fe-9804-aba843df23d8}</Project>

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Windows;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3.Util
 {
 	public class Geometry
 	{

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using General.AvlTreeSet;
+using OuelletConvexHullAvl3.AvlTreeSet;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
 	/// <summary>
 	/// Does not support multihtread
@@ -17,15 +13,15 @@ namespace OuelletConvexHullAvl2Online
 	{
 		// ******************************************************************
 		private int _count = 0;
-		private ConvexHullOnline _convexHullOnline;
+		private ConvexHull _convexHull;
 
 		private Quadrant _currentQuadrant = null;
 		private AvlNode<Point> _currentNode = null;
 
 		// ******************************************************************
-		public ConvexHullEnumerator(ConvexHullOnline convexHullOnline)
+		public ConvexHullEnumerator(ConvexHull convexHull)
 		{
-			_convexHullOnline = convexHullOnline;
+			_convexHull = convexHull;
 			_count = 0;
 		}
 
@@ -43,14 +39,14 @@ namespace OuelletConvexHullAvl2Online
 		// ******************************************************************
 		public bool MoveNext()
 		{
-			if (! _convexHullOnline.IsInitDone)
+			if (! _convexHull.IsInitDone)
 			{
 				return false;
 			}
 
 			if (_currentQuadrant == null)
 			{
-				_currentQuadrant = _convexHullOnline._q1;
+				_currentQuadrant = _convexHull._q1;
 				_currentNode = _currentQuadrant.GetFirstNode();
 			}
 			else
@@ -60,7 +56,7 @@ namespace OuelletConvexHullAvl2Online
 					AvlNode<Point> nextNode = _currentNode.GetNextNode();
 					if (nextNode == null)
 					{
-						if (_currentQuadrant == _convexHullOnline._q4)
+						if (_currentQuadrant == _convexHull._q4)
 						{
 							return false;
 						}

@@ -1,14 +1,12 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using General.AvlTreeSet;
+using OuelletConvexHullAvl3.AvlTreeSet;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
 	public abstract class Quadrant : AvlTreeSet<Point>
 	{
@@ -21,7 +19,7 @@ namespace OuelletConvexHullAvl2Online
 
 		protected IReadOnlyList<Point> ListOfPoint;
 
-		protected ConvexHullOnline _convexHullOnline = null;
+		protected ConvexHull ConvexHull = null;
 
 		// ************************************************************************
 		/// <summary>
@@ -29,9 +27,9 @@ namespace OuelletConvexHullAvl2Online
 		/// </summary>
 		/// <param name="listOfPoint"></param>
 		/// <param name="comparer">Comparer is only used to add the second point (the last point, which is compared against the first one).</param>
-		public Quadrant(ConvexHullOnline convexHullOnline, IReadOnlyList<Point> listOfPoint, IComparer<Point> comparer) : base(comparer)
+		public Quadrant(ConvexHull convexHull, IReadOnlyList<Point> listOfPoint, IComparer<Point> comparer) : base(comparer)
 		{
-			_convexHullOnline = convexHullOnline;
+			ConvexHull = convexHull;
 			ListOfPoint = listOfPoint;
 		}
 

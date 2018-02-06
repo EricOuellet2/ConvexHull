@@ -22,7 +22,7 @@ using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Loyc.Collections;
 using Mathematic;
-using OuelletConvexHullAvl2Online;
+using OuelletConvexHullAvl3;
 using MarkerType = OxyPlot.MarkerType;
 
 namespace ConvexHullWorkbench
@@ -466,7 +466,7 @@ namespace ConvexHullWorkbench
 								stopwatch.Reset();
 								stopwatch.Start();
 								algoOnline.Init();
-								var cho = algoOnline.Algo as ConvexHullOnline;
+								var cho = algoOnline.Algo as ConvexHull;
 								foreach (Point pt in _points)
 								{
 									cho.TryAddOnePoint(pt);
@@ -479,7 +479,7 @@ namespace ConvexHullWorkbench
 
 							if (algoOnline != null)
 							{
-								var cho = algoOnline.Algo as ConvexHullOnline;
+								var cho = algoOnline.Algo as ConvexHull;
 
 								stopwatch.Reset();
 								stopwatch.Start();
@@ -1108,52 +1108,52 @@ namespace ConvexHullWorkbench
 		{
 			GeneratePoints(); // Points are generated in "Point[] _points";
 
-			ConvexHullOnline convexHullOnline = new ConvexHullOnline();
+			ConvexHull convexHull = new ConvexHull();
 
 			// First way to call: Standard way to call (standard/batch)
-			convexHullOnline.CalcConvexHull(_points);
+			convexHull.CalcConvexHull(_points);
 
 			// Usage of IEnumerable wrapper to loop over each convex hull points 
 			// that are node in avl tree of each quadrant.
-			foreach (Point pt in convexHullOnline) { Debug.Print(pt.ToString()); }
+			foreach (Point pt in convexHull) { Debug.Print(pt.ToString()); }
 
 			//Or can get an array copy of the convex hull points
-			Point[] pointsStandardCall = convexHullOnline.GetResultsAsArrayOfPoint();
+			Point[] pointsStandardCall = convexHull.GetResultsAsArrayOfPoint();
 
-			convexHullOnline = new ConvexHullOnline();
+			convexHull = new ConvexHull();
 
 			// Second way to call: Adding one point at a time (online).
 			foreach (Point pt in _points)
 			{
-				convexHullOnline.TryAddOnePoint(pt);
+				convexHull.TryAddOnePoint(pt);
 			}
 
-			Point[] pointsOnlineCall = convexHullOnline.GetResultsAsArrayOfPoint();
+			Point[] pointsOnlineCall = convexHull.GetResultsAsArrayOfPoint();
 
-			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHullOnline), _points, 
+			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points, 
 				pointsStandardCall, pointsOnlineCall);
 			Debug.Assert(diffs.HasErrors == false);
 
-			convexHullOnline = new ConvexHullOnline();
+			convexHull = new ConvexHull();
 			Point[] allPoints = new Point[_points.Length * 2];
 			Array.Copy(_points, allPoints, _points.Length);
 
 			// Third way to call: Standard/Batch then Online
-			convexHullOnline.CalcConvexHull(_points);
+			convexHull.CalcConvexHull(_points);
 
 			GeneratePoints(_points.Length); // Points are generated in "Point[] _points";
 			Array.Copy(_points, 0, allPoints, _points.Length, _points.Length);
 
 			foreach (Point pt in _points)
 			{
-				convexHullOnline.TryAddOnePoint(pt);
+				convexHull.TryAddOnePoint(pt);
 			}
 
-			ConvexHullOnline convexHullOnline2 = new ConvexHullOnline();
+			ConvexHull convexHullOnline2 = new ConvexHull();
 			convexHullOnline2.CalcConvexHull(allPoints);
 
-			diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHullOnline), _points, 
-				convexHullOnline.GetResultsAsArrayOfPoint(), convexHullOnline2.GetResultsAsArrayOfPoint());
+			diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points, 
+				convexHull.GetResultsAsArrayOfPoint(), convexHullOnline2.GetResultsAsArrayOfPoint());
 
 			Debug.Assert(diffs.HasErrors == false);
 		}

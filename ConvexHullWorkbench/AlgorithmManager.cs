@@ -237,22 +237,22 @@ namespace ConvexHullWorkbench
 			AlgoIndexOuelletConvexHullAvl2 = _algorithms.Count - 1;
 
 			// Color c = Colors.
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online (add point in batch, same usage as AVL v2)",
-				"Eric Ouellet, Eric Ouellet", "Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkCyan,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v3 (standard/batch)",
+				"Eric Ouellet, Eric Ouellet", "Based on Avl v2 with little modifications and additional online methods.", OxyPlot.OxyColors.DarkCyan,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline();
-					convexHullOnline.CalcConvexHull(points);
-					return convexHullOnline.GetResultsAsArrayOfPoint();
+					OuelletConvexHullAvl3.ConvexHull convexHull = new OuelletConvexHullAvl3.ConvexHull();
+					convexHull.CalcConvexHull(points);
+					return convexHull.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullAvl2Online = _algorithms.Count - 1;
 
-			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v2 Online (add point one by one in a loop)", "Eric Ouellet, Eric Ouellet",
-				"Similar as Avl v2 but with little modifications and additional online methods.", OxyPlot.OxyColors.DarkOrchid,
+			_algorithms.Add(new AlgorithmStandard(AlgorithmType.ConvexHull, "Ouellet C# Avl v3 (one by one in a loop)", "Eric Ouellet, Eric Ouellet",
+				"Based on Avl v2 with little modifications and additional online methods.", OxyPlot.OxyColors.DarkOrchid,
 				(points, algorithmStat) =>
 				{
-					OuelletConvexHullAvl2Online.ConvexHullOnline convexHullOnline = new OuelletConvexHullAvl2Online.ConvexHullOnline();
+					OuelletConvexHullAvl3.ConvexHull convexHull = new OuelletConvexHullAvl3.ConvexHull();
 
 					// TEST to ensure that IsHullPoint and DynamicallyAddAnotherPointToConvexHullIfAppropriate appears to be coherent and works fine.
 					//foreach (Point pt in points)
@@ -278,10 +278,10 @@ namespace ConvexHullWorkbench
 
 					foreach (Point pt in points)
 					{
-						convexHullOnline.TryAddOnePoint(pt);
+						convexHull.TryAddOnePoint(pt);
 					}
 
-					return convexHullOnline.GetResultsAsArrayOfPoint();
+					return convexHull.GetResultsAsArrayOfPoint();
 				}));
 
 			AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineUse = _algorithms.Count - 1;
@@ -329,15 +329,15 @@ namespace ConvexHullWorkbench
 
 
 			// Color r = Colors.CornflowerBlue;
-			_algorithms.Add(new AlgorithmOnline(AlgorithmType.ConvexHullOnline, "Ouellet C# Avl v2 Online (** Only for Online performance test)", "Eric Ouellet, Eric Ouellet",
+			_algorithms.Add(new AlgorithmOnline(AlgorithmType.ConvexHullOnline, "Ouellet C# Avl v3 (** Only for Online performance test)", "Eric Ouellet, Eric Ouellet",
 				"Add point one by one for 'merging' performance test only.", OxyPlot.OxyColors.CornflowerBlue, () =>
 				{
-					return new OuelletConvexHullAvl2Online.ConvexHullOnline();
+					return new OuelletConvexHullAvl3.ConvexHull();
 				},
 
 				(Object obj, Point pt, AlgorithmStat stat) =>
 				{
-					var convexHullOnline = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
+					var convexHullOnline = obj as OuelletConvexHullAvl3.ConvexHull;
 					if (convexHullOnline == null)
 					{
 						throw new ArgumentException($"argument obj: '{obj}' is invalid.");
@@ -354,7 +354,7 @@ namespace ConvexHullWorkbench
 
 				(Object obj) =>
 				{
-					var ch = obj as OuelletConvexHullAvl2Online.ConvexHullOnline;
+					var ch = obj as OuelletConvexHullAvl3.ConvexHull;
 					if (ch == null)
 					{
 						throw new ArgumentException($"argument obj: '{obj}' is invalid.");

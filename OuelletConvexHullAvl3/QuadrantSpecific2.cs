@@ -1,32 +1,32 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using General.AvlTreeSet;
+using OuelletConvexHullAvl3.AvlTreeSet;
 
-namespace OuelletConvexHullAvl2Online
+namespace OuelletConvexHullAvl3
 {
-	public class QuadrantSpecific3 : Quadrant
+	public class QuadrantSpecific2 : Quadrant
 	{
 		// ************************************************************************
-		public const string QuadrantName = "Quadrant 3";
+		public const string QuadrantName = "Quadrant 2";
 
 		// ************************************************************************
-		public QuadrantSpecific3(ConvexHullOnline convexHull, IReadOnlyList<Point> listOfPoint) : base(convexHull, listOfPoint, new Q3Comparer())
+		public QuadrantSpecific2(ConvexHull convexHull, IReadOnlyList<Point> listOfPoint) : base(convexHull, listOfPoint, new Q2Comparer())
 		{
 			Name = QuadrantName;
 		}
 
 		// ******************************************************************
-		private QuadrantSpecific3()
+		private QuadrantSpecific2()
 		{
 		}
 
 		// ******************************************************************
 		public override Quadrant Clone()
 		{
-			var q = new QuadrantSpecific3();
+			var q = new QuadrantSpecific2();
 			this.CopyTo(q);
 			return q;
 		}
@@ -39,16 +39,17 @@ namespace OuelletConvexHullAvl2Online
 			double leftX = firstPoint.X;
 			double leftY = firstPoint.Y;
 
-			double bottomX = leftX;
-			double bottomY = leftY;
+			double topX = leftX;
+			double topY = leftY;
 
 			foreach (var point in ListOfPoint)
 			{
+
 				if (point.X <= leftX)
 				{
 					if (point.X == leftX)
 					{
-						if (point.Y < leftY)
+						if (point.Y > leftY)
 						{
 							leftY = point.Y;
 						}
@@ -60,40 +61,40 @@ namespace OuelletConvexHullAvl2Online
 					}
 				}
 
-				if (point.Y <= bottomY)
+				if (point.Y >= topY)
 				{
-					if (point.Y == bottomY)
+					if (point.Y == topY)
 					{
-						if (point.X < bottomX)
+						if (point.X < topX)
 						{
-							bottomX = point.X;
+							topX = point.X;
 						}
 					}
 					else
 					{
-						bottomX = point.X;
-						bottomY = point.Y;
+						topX = point.X;
+						topY = point.Y;
 					}
 				}
 			}
 
-			FirstPoint = new Point(leftX, leftY);
-			LastPoint = new Point(bottomX, bottomY);
-			RootPoint = new Point(bottomX, leftY);
+			FirstPoint = new Point(topX, topY);
+			LastPoint = new Point(leftX, leftY);
+			RootPoint = new Point(topX, leftY);
 		}
 
 		// ******************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override bool IsGoodQuadrantForPoint(Point pt)
 		{
-			if (pt.X <= this.RootPoint.X && pt.Y <= this.RootPoint.Y)
+			if (pt.X <= this.RootPoint.X && pt.Y >= this.RootPoint.Y)
 			{
 				return true;
 			}
 
 			return false;
 		}
-
+		
 		// ******************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override int IsHullPoint(ref Point point)
@@ -105,24 +106,6 @@ namespace OuelletConvexHullAvl2Online
 			while (CurrentNode != null)
 			{
 				if (point.X > CurrentNode.Item.X)
-				{
-					if (CurrentNode.Right != null)
-					{
-						CurrentNode = CurrentNode.Right;
-						continue;
-					}
-					currentNext = CurrentNode.GetNextNode();
-					if (CanQuickReject(ref point, ref currentNext.Item))
-					{
-						return 0;
-					}
-
-					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
-					{
-						return 0;
-					}
-				}
-				else if (point.X < CurrentNode.Item.X)
 				{
 					if (CurrentNode.Left != null)
 					{
@@ -141,9 +124,28 @@ namespace OuelletConvexHullAvl2Online
 						return 0;
 					}
 				}
+				else if (point.X < CurrentNode.Item.X)
+				{
+					if (CurrentNode.Right != null)
+					{
+						CurrentNode = CurrentNode.Right;
+						continue;
+					}
+
+					currentNext = CurrentNode.GetNextNode();
+					if (CanQuickReject(ref point, ref currentNext.Item))
+					{
+						return 0;
+					}
+
+					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
+					{
+						return 0;
+					}
+				}
 				else
 				{
-					if (point.Y >= CurrentNode.Item.Y)
+					if (point.Y <= CurrentNode.Item.Y)
 					{
 						if (point.Y == CurrentNode.Item.Y)
 						{
@@ -184,26 +186,6 @@ namespace OuelletConvexHullAvl2Online
 				var insertionSide = Side.Unknown;
 				if (point.X > CurrentNode.Item.X)
 				{
-					if (CurrentNode.Right != null)
-					{
-						CurrentNode = CurrentNode.Right;
-						continue;
-					}
-					currentNext = CurrentNode.GetNextNode();
-					if (CanQuickReject(ref point, ref currentNext.Item))
-					{
-						return 0;
-					}
-
-					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
-					{
-						return 0;
-					}
-
-					insertionSide = Side.Right;
-				}
-				else if (point.X < CurrentNode.Item.X)
-				{
 					if (CurrentNode.Left != null)
 					{
 						CurrentNode = CurrentNode.Left;
@@ -223,9 +205,30 @@ namespace OuelletConvexHullAvl2Online
 
 					insertionSide = Side.Left;
 				}
+				else if (point.X < CurrentNode.Item.X)
+				{
+					if (CurrentNode.Right != null)
+					{
+						CurrentNode = CurrentNode.Right;
+						continue;
+					}
+
+					currentNext = CurrentNode.GetNextNode();
+					if (CanQuickReject(ref point, ref currentNext.Item))
+					{
+						return 0;
+					}
+
+					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
+					{
+						return 0;
+					}
+
+					insertionSide = Side.Right;
+				}
 				else
 				{
-					if (point.Y >= CurrentNode.Item.Y)
+					if (point.Y <= CurrentNode.Item.Y)
 					{
 						if (point.Y == CurrentNode.Item.Y)
 						{
@@ -308,7 +311,7 @@ namespace OuelletConvexHullAvl2Online
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static bool CanQuickReject(ref Point pt, ref Point ptHull)
 		{
-			if (pt.X >= ptHull.X && pt.Y >= ptHull.Y)
+			if (pt.X >= ptHull.X && pt.Y <= ptHull.Y)
 			{
 				return true;
 			}
@@ -319,15 +322,16 @@ namespace OuelletConvexHullAvl2Online
 		// ******************************************************************
 		internal override Quadrant GetNextQuadrant()
 		{
-			return _convexHullOnline._q4;
+			return ConvexHull._q3;
 		}
 
 		// ******************************************************************
 		internal override Quadrant GetPreviousQuadrant()
 		{
-			return _convexHullOnline._q2;
+			return ConvexHull._q1;
 		}
 
 		// ******************************************************************
+
 	}
 }
