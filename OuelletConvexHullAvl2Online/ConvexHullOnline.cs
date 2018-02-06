@@ -35,15 +35,15 @@ namespace OuelletConvexHullAvl2Online
 		// ******************************************************************
 		private void Init(IReadOnlyList<Point> points)
 		{
-			if (points == null)
+			if (points == null || points.Count == 0)
 			{
-				points = _emptyListOfPoint;
+				return;
 			}
 
-			_q1 = new QuadrantSpecific1(points);
-			_q2 = new QuadrantSpecific2(points);
-			_q3 = new QuadrantSpecific3(points);
-			_q4 = new QuadrantSpecific4(points);
+			_q1 = new QuadrantSpecific1(this, points);
+			_q2 = new QuadrantSpecific2(this, points);
+			_q3 = new QuadrantSpecific3(this, points);
+			_q4 = new QuadrantSpecific4(this, points);
 
 			_quadrants = new Quadrant[] { _q1, _q2, _q3, _q4 };
 
@@ -748,55 +748,183 @@ namespace OuelletConvexHullAvl2Online
 
 		// ******************************************************************
 		/// <summary>
-		/// Chck if a point is already part of the Convex Hull.
+		/// Check if a point is already part of the Convex Hull.
 		/// In other word, it checks to see if the point is a duplicate.
-		/// Usefull??? Not sure?
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>true if the point already exists, false otherwise</returns>
 		public bool IsExists(Point pt)
 		{
-			if (pt.X >= _q1.RootPoint.X && pt.Y >= _q1.RootPoint.Y)
+			Quadrant q = _q1;
+			do
 			{
-				if (_q1.Contains(pt))
+				if (q.IsGoodQuadrantForPoint(pt))
 				{
-					return true;
-				}
-			}
-			else
-			{
-				if (pt.X <= _q2.RootPoint.X && pt.Y >= _q2.RootPoint.Y)
-				{
-					if (_q2.Contains(pt))
+					if (q.Contains(pt))
 					{
 						return true;
 					}
 				}
-				else
-				{
-					if (pt.X <= _q3.RootPoint.X && pt.Y <= _q3.RootPoint.Y)
-					{
-						if (_q3.Contains(pt))
-						{
-							return true;
-						}
-					}
-					else
-					{
-						if (pt.X >= _q4.RootPoint.X && pt.Y <= _q4.RootPoint.Y)
-						{
-							if (_q4.Contains(pt))
-							{
-								return true;
-							}
-						}
-					}
-				}
-			}
+
+				q = q.GetNextQuadrant();
+			} while (q != _q1);
 
 			return false;
 		}
 
+		// ******************************************************************
+		/// <summary>
+		/// Return the next neighbor of the item is exists. 
+		/// Otherwise it retuen default(Point).
+		/// Not super efficient. If you wan tto iterate over all points. It is 
+		/// better to call GetResultsAsArrayOfPoint() instead.
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns>Same point if only one. Next point if more than one and point exists. default(Point) otherwise (not found)</returns>
+		public Point GetNextPoint(Point pt)
+		{
+			if (Count <= 1)
+			{
+				if (Count == 1)
+				{
+					if (_q1.FirstPoint == pt)
+					{
+						return pt;
+					}
+				}
+			}
+			else
+			{
+				AvlNode<Point> node = null;
+
+				Quadrant q = _q1;
+				do
+				{
+					if (q.IsGoodQuadrantForPoint(pt))
+					{
+						node = q.GetNode(pt);
+						if (node != null)
+						{
+							node = node.GetNextNode();
+							if (node != null)
+							{
+								return node.Item;
+							}
+							
+							return GetNextNodeNotBeingPoint(q, pt);
+						}
+					}
+
+					q = q.GetNextQuadrant();
+				} while (q != _q1);
+			}
+
+			return default(Point);
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// Return the previous neighbor of the item is exists. 
+		/// Otherwise it retuen default(Point).
+		/// Not super efficient. If you wan tto iterate over all points. It is 
+		/// better to call GetResultsAsArrayOfPoint() instead.
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns>Same point if only one. Next point if more than one and point exists. default(Point) otherwise (not found)</returns>
+		public Point GetPreviousPoint(Point pt)
+		{
+			if (Count <= 1)
+			{
+				if (Count == 1)
+				{
+					if (_q1.FirstPoint == pt)
+					{
+						return pt;
+					}
+				}
+			}
+			else
+			{
+				AvlNode<Point> node = null;
+
+				Quadrant q = _q1;
+				do
+				{
+					if (q.IsGoodQuadrantForPoint(pt))
+					{
+						node = q.GetNode(pt);
+						if (node != null)
+						{
+							node = node.GetPreviousNode();
+							if (node != null)
+							{
+								return node.Item;
+							}
+
+							return GetPreviousNodeNotBeingPoint(q, pt);
+						}
+					}
+
+					q = q.GetPreviousQuadrant();
+				} while (q != _q1);
+			}
+
+			return default(Point);
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// Can't be call for Hull count smaller or equal to 1 because it will loop forever.
+		/// </summary>
+		/// <param name="q">Quadrant where the point has no next node</param>
+		/// <param name="pt">Last point of a quadrant</param>
+		/// <returns></returns>
+		private Point GetNextNodeNotBeingPoint(Quadrant q, Point pt)
+		{
+			for (; ; )
+			{
+				q = q.GetNextQuadrant();
+				AvlNode<Point> node = q.GetFirstNode();
+				if (node.Item != pt)
+				{
+					return node.Item;
+				}
+
+				node = node.GetNextNode();
+				if (node != null)
+				{
+					return node.Item;
+				}
+			}
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// Can't be call for Hull count smaller or equal to 1 because it will loop forever.
+		/// </summary>
+		/// <param name="q">Quadrant where the point has no next node</param>
+		/// <param name="pt">Last point of a quadrant</param>
+		/// <returns></returns>
+		private Point GetPreviousNodeNotBeingPoint(Quadrant q, Point pt)
+		{
+			for (; ; )
+			{
+				q = q.GetPreviousQuadrant();
+				AvlNode<Point> node = q.GetLastNode();
+				if (node.Item != pt)
+				{
+					return node.Item;
+				}
+
+				node = node.GetPreviousNode();
+				if (node != null)
+				{
+					return node.Item;
+				}
+			}
+		}
+
+		// ******************************************************************
 		/// <summary>
 		/// Verify if a point would be added or not as a part of the 
 		/// current convex hull solution. 
@@ -1973,6 +2101,62 @@ namespace OuelletConvexHullAvl2Online
 			_q2.DumpVisual();
 			_q3.DumpVisual();
 			_q4.DumpVisual();
+		}
+
+		// ******************************************************************
+		public string DumpMaxHeight()
+		{
+			return $"Max Height: {_q1.GetMaxHeight()} | {_q2.GetMaxHeight()} | {_q3.GetMaxHeight()} | {_q4.GetMaxHeight()}";
+		}
+
+
+		// ******************************************************************
+		public string DumpTreeNodeCount()
+		{
+			return $"Node count: {_q1.Count} | {_q2.Count} | {_q3.Count} | {_q4.Count}";
+		}
+
+		// ******************************************************************
+		public void CheckNextNodePreviousNodeCoherence()
+		{
+			if (!IsInitDone)
+			{
+				return;
+			}
+			
+			Point[] results = GetResultsAsArrayOfPoint();
+			int index = 0;
+
+			if (results.Length > 1)
+			{
+				if (_q1.FirstPoint == _q4.LastPoint)
+				{
+					index = results.Length -
+							2; // Don't ask :-) ... Optimization in both place (GetResultsAsArrayOfPoint and Enumerator... generate a little incoherence between both func, diff start point sometimes)
+				}
+			}
+
+			foreach (Point pt in this)
+			{
+				Debug.Assert(results[index] == pt);
+				Point ptNext = GetNextPoint(pt);
+				int indexTemp = index >= results.Length - 1 ? 0 : index + 1;
+				Debug.Assert(ptNext == results[indexTemp]);
+
+				Point ptPrevious = GetPreviousPoint(pt);
+				indexTemp = index == 0 ? results.Length - 2 : index - 1;
+				if (indexTemp < 0) // When results.length = 1
+				{
+					indexTemp = 0;
+				}
+				Debug.Assert(ptPrevious == results[indexTemp]);
+
+				index++;
+				if (index >= results.Length -1)
+				{
+					index = 0;
+				}
+			}
 		}
 
 		// ******************************************************************

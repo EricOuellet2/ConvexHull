@@ -471,15 +471,16 @@ namespace ConvexHullWorkbench
 								{
 									cho.TryAddOnePoint(pt);
 								}
-								// result = algoStd.Calc(_points, stat);
 								result = algoOnline.GetResult();
 								stopwatch.Stop();
+
 								timeSpanTotal += stopwatch.Elapsed;
 							}
 
 							if (algoOnline != null)
 							{
 								var cho = algoOnline.Algo as ConvexHullOnline;
+
 								stopwatch.Reset();
 								stopwatch.Start();
 								foreach (Point point in pointsToAdd)
@@ -493,9 +494,6 @@ namespace ConvexHullWorkbench
 							}
 							else
 							{
-								// Point[] newPoints = MergeArrays((Point[])result, points);
-								// Point[] newPoints = MergeArrays(points, (Point[])result);
-
 								foreach (Point point in pointsToAdd)
 								{
 									stopwatch.Reset();
@@ -531,7 +529,8 @@ namespace ConvexHullWorkbench
 							var algoStd = algo as AlgorithmStandard;
 							if (algoStd == null)
 							{
-								throw new InvalidOperationException($"Stats can only be acheived on '{nameof(AlgorithmStandard)}'.");
+								MessageBox.Show($"Stats can only be acheived on '{nameof(AlgorithmStandard)}' (Not online).");
+								return;
 							}
 
 							stopwatch.Reset();
@@ -541,6 +540,8 @@ namespace ConvexHullWorkbench
 
 							stat.TimeSpanCSharp = stopwatch.Elapsed; //  TimeSpan.FromTicks(stopwatch.ElapsedTicks);
 							stat.PointCount = _points.Length;
+
+							Debug.Assert(result.Count > _points.Length - 100);
 						}
 
 						stat.ResultCount = result?.Count ?? -1;
@@ -1095,7 +1096,7 @@ namespace ConvexHullWorkbench
 			{
 				if (algo.IsSelected)
 				{
-					algorithms.Add(algo as Algorithm);
+					algorithms.Add(algo);
 				}
 			}
 
@@ -1103,8 +1104,61 @@ namespace ConvexHullWorkbench
 		}
 
 		// ******************************************************************
+		public void CallOnlineConvexHullDifferentWays()
+		{
+			GeneratePoints(); // Points are generated in "Point[] _points";
 
+			ConvexHullOnline convexHullOnline = new ConvexHullOnline();
 
+			// First way to call: Standard way to call (standard/batch)
+			convexHullOnline.CalcConvexHull(_points);
+
+			// Usage of IEnumerable wrapper to loop over each convex hull points 
+			// that are node in avl tree of each quadrant.
+			foreach (Point pt in convexHullOnline) { Debug.Print(pt.ToString()); }
+
+			//Or can get an array copy of the convex hull points
+			Point[] pointsStandardCall = convexHullOnline.GetResultsAsArrayOfPoint();
+
+			convexHullOnline = new ConvexHullOnline();
+
+			// Second way to call: Adding one point at a time (online).
+			foreach (Point pt in _points)
+			{
+				convexHullOnline.TryAddOnePoint(pt);
+			}
+
+			Point[] pointsOnlineCall = convexHullOnline.GetResultsAsArrayOfPoint();
+
+			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHullOnline), _points, 
+				pointsStandardCall, pointsOnlineCall);
+			Debug.Assert(diffs.HasErrors == false);
+
+			convexHullOnline = new ConvexHullOnline();
+			Point[] allPoints = new Point[_points.Length * 2];
+			Array.Copy(_points, allPoints, _points.Length);
+
+			// Third way to call: Standard/Batch then Online
+			convexHullOnline.CalcConvexHull(_points);
+
+			GeneratePoints(_points.Length); // Points are generated in "Point[] _points";
+			Array.Copy(_points, 0, allPoints, _points.Length, _points.Length);
+
+			foreach (Point pt in _points)
+			{
+				convexHullOnline.TryAddOnePoint(pt);
+			}
+
+			ConvexHullOnline convexHullOnline2 = new ConvexHullOnline();
+			convexHullOnline2.CalcConvexHull(allPoints);
+
+			diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHullOnline), _points, 
+				convexHullOnline.GetResultsAsArrayOfPoint(), convexHullOnline2.GetResultsAsArrayOfPoint());
+
+			Debug.Assert(diffs.HasErrors == false);
+		}
+
+		// ******************************************************************
 
 	}
 }

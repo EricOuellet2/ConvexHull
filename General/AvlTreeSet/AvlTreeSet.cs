@@ -106,7 +106,7 @@ namespace General.AvlTreeSet
 		}
 
 		// ******************************************************************
-		protected AvlNode<T> GetNode(T item)
+		public AvlNode<T> GetNode(T item)
 		{
 			AvlNode<T> node = _root;
 
@@ -1303,6 +1303,12 @@ namespace General.AvlTreeSet
 		}
 
 		// ************************************************************************
+		public int GetMaxHeight()
+		{
+			return GetMaxHeightRecursive(Root);
+		}
+
+		// ************************************************************************
 		private int GetMaxHeightRecursive(AvlNode<T> node)
 		{
 			if (node == null)
@@ -1310,19 +1316,7 @@ namespace General.AvlTreeSet
 				return 0;
 			}
 
-			int leftHeight = 0;
-			if (node.Left != null)
-			{
-				leftHeight = GetMaxHeightRecursive(node.Left);
-			}
-
-			int rightHeight = 0;
-			if (node.Right != null)
-			{
-				rightHeight = GetMaxHeightRecursive(node.Right);
-			}
-
-			return 1 + Math.Max(leftHeight, rightHeight);
+			return 1 + Math.Max(GetMaxHeightRecursive(node.Left), GetMaxHeightRecursive(node.Right));
 		}
 
 		// ******************************************************************
@@ -1402,23 +1396,6 @@ namespace General.AvlTreeSet
 			}
 
 			return true;
-		}
-
-		// ************************************************************************
-		private int GetMaxLevel()
-		{
-			return GetMaxLevelRecursive(Root);
-		}
-
-		// ************************************************************************
-		private int GetMaxLevelRecursive(AvlNode<T> node)
-		{
-			if (node == null)
-			{
-				return 0;
-			}
-
-			return 1 + Math.Max(GetMaxLevelRecursive(node.Left), GetMaxLevelRecursive(node.Right));
 		}
 
 		// ************************************************************************

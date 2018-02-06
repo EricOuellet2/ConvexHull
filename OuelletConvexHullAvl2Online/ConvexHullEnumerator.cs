@@ -60,23 +60,12 @@ namespace OuelletConvexHullAvl2Online
 					AvlNode<Point> nextNode = _currentNode.GetNextNode();
 					if (nextNode == null)
 					{
-						if (_currentQuadrant == _convexHullOnline._q1)
-						{
-							_currentQuadrant = _convexHullOnline._q2;
-						}
-						else if (_currentQuadrant == _convexHullOnline._q2)
-						{
-							_currentQuadrant = _convexHullOnline._q3;
-						}
-
-						else if (_currentQuadrant == _convexHullOnline._q3)
-						{
-							_currentQuadrant = _convexHullOnline._q4;
-						}
-						else
+						if (_currentQuadrant == _convexHullOnline._q4)
 						{
 							return false;
 						}
+
+						_currentQuadrant = _currentQuadrant.GetNextQuadrant();
 
 						nextNode = _currentQuadrant.GetFirstNode();
 

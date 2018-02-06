@@ -21,21 +21,23 @@ namespace OuelletConvexHullAvl2Online
 
 		protected IReadOnlyList<Point> ListOfPoint;
 
+		protected ConvexHullOnline _convexHullOnline = null;
+
 		// ************************************************************************
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="listOfPoint"></param>
 		/// <param name="comparer">Comparer is only used to add the second point (the last point, which is compared against the first one).</param>
-		public Quadrant(IReadOnlyList<Point> listOfPoint, IComparer<Point> comparer) : base(comparer)
+		public Quadrant(ConvexHullOnline convexHullOnline, IReadOnlyList<Point> listOfPoint, IComparer<Point> comparer) : base(comparer)
 		{
+			_convexHullOnline = convexHullOnline;
 			ListOfPoint = listOfPoint;
 		}
 
 		// ************************************************************************
 		protected Quadrant()
 		{
-
 		}
 
 		// ************************************************************************
@@ -92,9 +94,9 @@ namespace OuelletConvexHullAvl2Online
 		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>
 		internal abstract int ProcessPoint(ref Point point);
 
-		//// ************************************************************************
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		//protected abstract bool IsGoodQuadrantForPoint(Point pt);
+		// ************************************************************************
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal abstract bool IsGoodQuadrantForPoint(Point pt);
 
 		// ************************************************************************
 		// protected abstract bool CanQuickReject(Point pt, Point ptHull);
@@ -160,6 +162,12 @@ namespace OuelletConvexHullAvl2Online
 				}
 			}
 		}
+
+		// ************************************************************************
+		internal abstract Quadrant GetNextQuadrant();
+
+		// ******************************************************************
+		internal abstract Quadrant GetPreviousQuadrant();
 
 		// ************************************************************************
 		public abstract Quadrant Clone();

@@ -389,11 +389,8 @@
 												 Value="{Binding CountOfPointToAddSequentially}" />
 									</WrapPanel>
 									<TextBlock FontStyle="Italic" TextWrapping="Wrap">'Speed Test' to partly show 'online' convex hull advantages. For conventional (not online) algorithm, the resulting convex hull is resized by one more for each new point. Then  we add the new point to the array. Then calculate another convex hull. Loop n times.</TextBlock>
-									
-									<!--<Button Name="TestOnline" Click="TestOnlineOnClick">Test Convex Hull Online</Button>-->
 								</StackPanel>
 							</GroupBox>
-							
 						</WrapPanel>
 					</Grid>
 				</ScrollViewer>
@@ -416,11 +413,15 @@
 
 
 		<StatusBar Grid.Row="1">
-			<StatusBarItem HorizontalAlignment="Right">
+			<StatusBarItem HorizontalAlignment="Left">
 				<StackPanel Orientation="Horizontal">
 					<Button Name="QuickTest" Click="QuickTestClick" Visibility="Collapsed">Test</Button>
-
+					<Button Name="TestOnline" Click="TestOnlineOnClick" IsEnabled="False">This button leads to code that show different ways to call the Online Ouellet Convex Hull (only for programmer)</Button>
 					<!--<CheckBox IsChecked="{Binding Global.IsCancel, Mode=OneWay}" Foreground="Black">Canceled</CheckBox>-->
+				</StackPanel>
+			</StatusBarItem>
+			<StatusBarItem HorizontalAlignment="Right" >
+				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="Canceled">
 						<TextBlock.Resources>
 							<Style TargetType="TextBlock">
@@ -439,7 +440,8 @@
 					<TextBlock Text="Quadrant: " Margin="12,0,0,0"></TextBlock>
 					<TextBlock Text="{Binding Global.Instance.Quadrant}" Width="40"></TextBlock>
 					<TextBlock Text="Iterations: "></TextBlock>
-					<TextBlock Text="{Binding Iteration}" Width="80"></TextBlock>
+					<TextBlock Text="{Binding Iteration}" Width="80"></TextBlock>					
+					
 				</StackPanel>
 			</StatusBarItem>
 		</StatusBar>

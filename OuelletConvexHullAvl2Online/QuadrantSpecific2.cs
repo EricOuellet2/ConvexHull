@@ -13,15 +13,14 @@ namespace OuelletConvexHullAvl2Online
 		public const string QuadrantName = "Quadrant 2";
 
 		// ************************************************************************
-		public QuadrantSpecific2(IReadOnlyList<Point> listOfPoint) : base(listOfPoint, new Q2Comparer())
+		public QuadrantSpecific2(ConvexHullOnline convexHull, IReadOnlyList<Point> listOfPoint) : base(convexHull, listOfPoint, new Q2Comparer())
 		{
 			Name = QuadrantName;
 		}
 
 		// ******************************************************************
-		internal QuadrantSpecific2()
+		private QuadrantSpecific2()
 		{
-
 		}
 
 		// ******************************************************************
@@ -84,19 +83,18 @@ namespace OuelletConvexHullAvl2Online
 			RootPoint = new Point(topX, leftY);
 		}
 
-		//// ******************************************************************
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		//protected override bool IsGoodQuadrantForPoint(Point pt)
-		//{
-		//	if (pt.X < this.RootPoint.X && pt.Y > this.RootPoint.Y)
-		//	{
-		//		return true;
-		//	}
+		// ******************************************************************
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal override bool IsGoodQuadrantForPoint(Point pt)
+		{
+			if (pt.X <= this.RootPoint.X && pt.Y >= this.RootPoint.Y)
+			{
+				return true;
+			}
 
-		//	return false;
-		//}
-
-
+			return false;
+		}
+		
 		// ******************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override int IsHullPoint(ref Point point)
@@ -180,10 +178,10 @@ namespace OuelletConvexHullAvl2Online
 
 			while (CurrentNode != null)
 			{
-				//if (CanQuickReject(point, CurrentNode.Item))
-				//{
-				//	return false;
-				//}
+				if (CanQuickReject(ref point, ref CurrentNode.Item))
+				{
+					return 0;
+				}
 
 				var insertionSide = Side.Unknown;
 				if (point.X > CurrentNode.Item.X)
@@ -205,11 +203,6 @@ namespace OuelletConvexHullAvl2Online
 						return 0;
 					}
 
-					//if (CurrentNode.Item == point) // Ensure to have no duplicate
-					//{
-					//	return;
-					//}
-
 					insertionSide = Side.Left;
 				}
 				else if (point.X < CurrentNode.Item.X)
@@ -230,11 +223,6 @@ namespace OuelletConvexHullAvl2Online
 					{
 						return 0;
 					}
-
-					//if (CurrentNode.Item == point) // Ensure to have no duplicate
-					//{
-					//	return;
-					//}
 
 					insertionSide = Side.Right;
 				}
@@ -329,6 +317,18 @@ namespace OuelletConvexHullAvl2Online
 			}
 
 			return false;
+		}
+
+		// ******************************************************************
+		internal override Quadrant GetNextQuadrant()
+		{
+			return _convexHullOnline._q3;
+		}
+
+		// ******************************************************************
+		internal override Quadrant GetPreviousQuadrant()
+		{
+			return _convexHullOnline._q1;
 		}
 
 		// ******************************************************************

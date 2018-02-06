@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Windows.Threading;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using OuelletConvexHullArray;
 using OuelletConvexHullAvl2Online;
@@ -237,6 +238,87 @@ namespace ConvexHullWorkbench
 		private void QuickTestClick(object sender, RoutedEventArgs e)
 		{
 			// Task.Run(new Action(() => QuickTestClickInternal()));
+			List<Point> points = new List<Point>();
+			points.Add(new Point(3,3));
+			points.Add(new Point(6, 3));
+
+			ConvexHullOnline ch = new ConvexHullOnline();
+			ch.CalcConvexHull(points);
+
+			var diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
+			Debug.Assert(diff.HasErrors == false);
+
+			Debug.Assert(ch.GetNextPoint(new Point(3, 3)) == new Point(6, 3));
+			Debug.Assert(ch.GetNextPoint(new Point(6, 3)) == new Point(3, 3));
+			Debug.Assert(ch.GetNextPoint(new Point(4,5)) == default(Point));
+			Debug.Assert(ch.Count == 2);
+
+
+
+			points = new List<Point>();
+			ch = new ConvexHullOnline();
+			points.Add(new Point(3, 5));
+			points.Add(new Point(3, 3));
+
+			ch = new ConvexHullOnline();
+			ch.CalcConvexHull(points);
+
+			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
+			Debug.Assert(diff.HasErrors == false);
+
+			Debug.Assert(ch.GetNextPoint(new Point(3, 3)) == new Point(3, 5));
+			Debug.Assert(ch.GetNextPoint(new Point(3, 5)) == new Point(3, 3));
+			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
+			Debug.Assert(ch.Count == 2);
+
+
+
+
+			points = new List<Point>();
+			ch = new ConvexHullOnline();
+			points.Add(new Point(3, 3));
+			points.Add(new Point(3,5));
+
+			ch = new ConvexHullOnline();
+			ch.CalcConvexHull(points);
+
+			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
+			Debug.Assert(diff.HasErrors == false);
+
+			Debug.Assert(ch.GetNextPoint(new Point(3, 3)) == new Point(3, 5));
+			Debug.Assert(ch.GetNextPoint(new Point(3, 5)) == new Point(3, 3));
+			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
+			Debug.Assert(ch.Count == 2);
+
+
+			points = new List<Point>();
+			ch = new ConvexHullOnline();
+			points.Add(new Point(3, 3));
+
+			ch = new ConvexHullOnline();
+			ch.CalcConvexHull(points);
+
+			diff = ConvexHullUtil.GetPathDifferences("", points, points, ch.GetResultsAsArrayOfPoint());
+			Debug.Assert(diff.HasErrors == false);
+
+			Debug.Assert(ch.GetNextPoint(new Point(3, 3)) == new Point(3, 3));
+			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
+			Debug.Assert(ch.Count == 1);
+
+			Task.Run(new Action(() =>
+			{
+				for (; ; )
+				{
+					Model.GeneratePoints();
+
+					ch = new ConvexHullOnline();
+					ch.CalcConvexHull(Model.Points);
+					ch.CheckNextNodePreviousNodeCoherence();
+
+					Model.Iteration++;
+				}
+			}));
+
 
 
 		}
@@ -632,42 +714,47 @@ namespace ConvexHullWorkbench
 
 		// ******************************************************************
 		private void TestConvexHullOnline()
-		{ 
-		//			var ch = new OuelletConvexHullAvl2Online.ConvexHull();
+		{
+			Model.CallOnlineConvexHullDifferentWays();
 
 
-			// Model.AlgorithmTests(new List<Algorithm> { AlgorithmManager.Instance.Algorithms[AlgorithmManager.Instance.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineInterface]});
 
 
-			TestSetOfPoint testSet = ConvexHullTests.GetExtensiveTestSet();
-
-			//Test proper behavior Q1
-			Global.Instance.Quadrant = "Q1";
-			ExecuteOneSetOfTest(testSet);
+			////			var ch = new OuelletConvexHullAvl2Online.ConvexHull();
 
 
-			//Test proper behavior Q2
-			Global.Instance.Quadrant = "Q2";
-			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
-			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
-			ExecuteOneSetOfTest(testSet);
+			//	// Model.AlgorithmTests(new List<Algorithm> { AlgorithmManager.Instance.Algorithms[AlgorithmManager.Instance.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineInterface]});
 
 
-			//Test proper behavior Q3
-			Global.Instance.Quadrant = "Q3";
-			ConvexHullUtil.InvertCoordinate(testSet.Points, false, true);
-			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, false, true);
-			ExecuteOneSetOfTest(testSet);
+			//	TestSetOfPoint testSet = ConvexHullTests.GetExtensiveTestSet();
+
+			//	//Test proper behavior Q1
+			//	Global.Instance.Quadrant = "Q1";
+			//	ExecuteOneSetOfTest(testSet);
 
 
-			//Test proper behavior Q4
-			Global.Instance.Quadrant = "Q4";
-			ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
-			ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
-			ExecuteOneSetOfTest(testSet);
+			//	//Test proper behavior Q2
+			//	Global.Instance.Quadrant = "Q2";
+			//	ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			//	ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			//	ExecuteOneSetOfTest(testSet);
 
 
-			return;
+			//	//Test proper behavior Q3
+			//	Global.Instance.Quadrant = "Q3";
+			//	ConvexHullUtil.InvertCoordinate(testSet.Points, false, true);
+			//	ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, false, true);
+			//	ExecuteOneSetOfTest(testSet);
+
+
+			//	//Test proper behavior Q4
+			//	Global.Instance.Quadrant = "Q4";
+			//	ConvexHullUtil.InvertCoordinate(testSet.Points, true, false);
+			//	ConvexHullUtil.InvertCoordinate(testSet.ExpectedResult, true, false);
+			//	ExecuteOneSetOfTest(testSet);
+
+
+			//	return;
 
 			//Model.GeneratePoints();
 

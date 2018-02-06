@@ -83,7 +83,6 @@
   <ItemGroup>
     <Compile Include="ConvexHullThreadUsage.cs" />
     <Compile Include="Limit.cs" />
-    <Compile Include="PointInfo.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Q4Comparer.cs" />
