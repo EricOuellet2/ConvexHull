@@ -326,8 +326,7 @@ namespace ConvexHullWorkbench
 				}));
 
 			AlgoIndexOuelletConvexHullCpp = _algorithms.Count - 1;
-
-
+			
 			// Color r = Colors.CornflowerBlue;
 			_algorithms.Add(new AlgorithmOnline(AlgorithmType.ConvexHullOnline, "Ouellet C# Avl v3 (** Only for Online performance test)", "Eric Ouellet, Eric Ouellet",
 				"Add point one by one for 'merging' performance test only.", OxyPlot.OxyColors.CornflowerBlue, () =>

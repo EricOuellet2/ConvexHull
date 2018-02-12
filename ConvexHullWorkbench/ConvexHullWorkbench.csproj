@@ -151,6 +151,8 @@
     <Compile Include="AlgorithmType.cs" />
     <Compile Include="DrawInfo.cs" />
     <Compile Include="DrawStyle.cs" />
+    <Compile Include="EnumAddPointPostBehavior.cs" />
+    <Compile Include="EnumBindingSourceExtension .cs" />
     <Compile Include="JetBrainsAnnotations.cs" />
     <Compile Include="MainWindowModel.cs" />
     <Compile Include="LogEntry.cs" />

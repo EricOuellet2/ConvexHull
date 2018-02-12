@@ -144,7 +144,7 @@ void OuelletHull::CalcConvexHull()
 			{
 				if (pt.y > q2p2.y)
 				{
-					q2p2.y = pt.y;
+					q2p2 = pt;
 				}
 				else
 				{

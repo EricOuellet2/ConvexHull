@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConvexHullWorkbench"
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="ConvexHull workbench by Eric Ouellet" Height="900" Width="1800">
 	<Window.DataContext>
@@ -56,6 +57,12 @@
 		</Border>
 
 		<TextBlock x:Key="Produce" Text=" >>>" x:Shared="False"></TextBlock>
+
+		<ObjectDataProvider x:Key="EnumAddPointPostBehavior" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+			<ObjectDataProvider.MethodParameters>
+				<x:Type TypeName="local:EnumAddPointPostBehavior"/>
+			</ObjectDataProvider.MethodParameters>
+		</ObjectDataProvider>
 		
 	</Window.Resources>
 
@@ -65,14 +72,14 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<Grid>
+		<Grid Name="GridWithCols">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="12*"></ColumnDefinition>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 				<ColumnDefinition Width="3*"></ColumnDefinition>
 			</Grid.ColumnDefinitions>
 
-			<Grid>
+			<Grid Name="GridWithRows">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="*"></RowDefinition>
 					<RowDefinition Height="Auto"></RowDefinition>
@@ -86,7 +93,7 @@
 				<!--Model="{Binding PlotModel}"-->
 				<oxy:PlotView Name="PlotViewMain"/>
 
-				<GridSplitter Grid.Row="1" Height="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+				<GridSplitter Grid.Row="1" Name="GridSplitterHorizontal" Height="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
 				<ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" Margin="0,5,0,-5" Grid.RowSpan="4">
 					<Grid>
@@ -382,13 +389,36 @@
 								</GroupBox.Header>
 
 								<StackPanel>
-									<WrapPanel>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"></ColumnDefinition>
+											<ColumnDefinition></ColumnDefinition>
+										</Grid.ColumnDefinitions>
+										
+										<Grid.RowDefinitions>
+											<RowDefinition></RowDefinition>
+											<RowDefinition></RowDefinition>
+										</Grid.RowDefinitions>
+										
 										<Button Name="SpeedTestOnline" Click="SpeedTestOnlineClick">Start test</Button>
-										<TextBlock Text="{Binding CountOfPointToAddSequentially, StringFormat='Merge ({0} times)'}" Width="120"></TextBlock>
-										<Slider Width="160" Minimum="0" Maximum="10000" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
-												 Value="{Binding CountOfPointToAddSequentially}" />
-									</WrapPanel>
-									<TextBlock FontStyle="Italic" TextWrapping="Wrap">'Speed Test' to partly show 'online' convex hull advantages. For conventional (not online) algorithm, the resulting convex hull is resized by one more for each new point. Then  we add the new point to the array. Then calculate another convex hull. Loop n times.</TextBlock>
+										<!--<TextBlock Text="{Binding CountOfPointToAddSequentially, StringFormat='Merge ({0} times)'}" Width="60"></TextBlock>-->
+										<!--<Slider Width="160" Minimum="0" Maximum="10000" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
+												 Value="{Binding CountOfPointToAddSequentially}" />-->
+										
+										<!--<CheckBox Grid.Column="1" IsChecked="{Binding IsUseGetPreviousInsteadOfFullArrayCopy}">
+											<TextBlock TextWrapping="Wrap">Use GetPrevious() func instead of querying a full array copy of convex hull result.</TextBlock></CheckBox>-->
+
+										<StackPanel Grid.Column="1" Orientation="Horizontal">
+											<TextBlock Text="Iterations: " VerticalAlignment="Center"></TextBlock>
+											<TextBox Text="{Binding CountOfTest, UpdateSourceTrigger=PropertyChanged}" Width="80" VerticalAlignment="Center"></TextBox>
+										</StackPanel>
+
+										<ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+												  ItemsSource="{Binding Source={StaticResource EnumAddPointPostBehavior}}"
+												  SelectedItem="{Binding EnumAddPointPostBehavior}"></ComboBox>
+										
+									</Grid>
+									<TextBlock FontStyle="Italic" TextWrapping="Wrap">'Speed Test' to show 'online' convex hull advantages. For conventional (not online) algorithm, the resulting convex hull is resized by one more for each new point. Then  we add the new point to the array. Then calculate another convex hull. Loop n times.</TextBlock>
 								</StackPanel>
 							</GroupBox>
 						</WrapPanel>
@@ -396,7 +426,7 @@
 				</ScrollViewer>
 			</Grid>
 
-			<GridSplitter Grid.Column="1" Width="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+			<GridSplitter Grid.Column="1" Name="GridSplitterVertical" Width="7" Background="Gray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
 			<Rectangle Grid.Column="2" Fill="LightYellow"/>
 
@@ -417,6 +447,7 @@
 				<StackPanel Orientation="Horizontal">
 					<Button Name="QuickTest" Click="QuickTestClick" Visibility="Collapsed">Test</Button>
 					<Button Name="TestOnline" Click="TestOnlineOnClick" IsEnabled="False">This button leads to code that show different ways to call the Online Ouellet Convex Hull (only for programmer)</Button>
+					<Button Click="ButtonClick">Resize</Button>
 					<!--<CheckBox IsChecked="{Binding Global.IsCancel, Mode=OneWay}" Foreground="Black">Canceled</CheckBox>-->
 				</StackPanel>
 			</StatusBarItem>

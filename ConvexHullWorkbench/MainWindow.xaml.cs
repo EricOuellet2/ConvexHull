@@ -867,5 +867,12 @@ namespace ConvexHullWorkbench
 		}
 
 		// ************************************************************************
+		private void ButtonClick(object sender, RoutedEventArgs e)
+		{
+			GridWithCols.ColumnDefinitions[0].Width = new GridLength(800);
+			GridWithRows.RowDefinitions[0].Height = new GridLength(500);
+		}
+
+		// ************************************************************************
 	}
 }

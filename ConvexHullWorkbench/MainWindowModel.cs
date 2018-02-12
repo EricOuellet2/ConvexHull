@@ -125,7 +125,7 @@ namespace ConvexHullWorkbench
 
 			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2Online].IsSelected = true;
 			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullAvl2OnlineWithOnlineUse].IsSelected = true;
-			
+
 			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHull4Threads].IsSelected = true;
 			AlgorithmManager.Algorithms[AlgorithmManager.AlgoIndexOuelletConvexHullMultiThreads].IsSelected = true;
 
@@ -358,15 +358,39 @@ namespace ConvexHullWorkbench
 			};
 		}
 
-		// ******************************************************************
-		private int _countOfPointToAddSequentially = 1000;
+		//// ******************************************************************
+		//private int _countOfPointToAddSequentially = 1000;
 
-		public int CountOfPointToAddSequentially
+		//public int CountOfPointToAddSequentially
+		//{
+		//	get { return _countOfPointToAddSequentially; }
+		//	set
+		//	{
+		//		_countOfPointToAddSequentially = value;
+		//		RaisePropertyChanged();
+		//	}
+		//}
+
+		// ******************************************************************
+		//private bool _isUseGetPreviousInsteadOfFullArrayCopy = false;
+
+		//public bool IsUseGetPreviousInsteadOfFullArrayCopy
+		//{
+		//	get => _isUseGetPreviousInsteadOfFullArrayCopy;
+		//	set
+		//	{
+		//		_isUseGetPreviousInsteadOfFullArrayCopy = value;
+		//		RaisePropertyChanged();
+		//	}
+		//}
+		private EnumAddPointPostBehavior _enumAddPointPostBehavior = EnumAddPointPostBehavior.GetResultAsArrayOfPointAlways;
+
+		public EnumAddPointPostBehavior EnumAddPointPostBehavior
 		{
-			get { return _countOfPointToAddSequentially; }
+			get { return _enumAddPointPostBehavior; }
 			set
 			{
-				_countOfPointToAddSequentially = value;
+				_enumAddPointPostBehavior = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -390,14 +414,14 @@ namespace ConvexHullWorkbench
 			string onlineTest = null;
 			if (isOnlineTest)
 			{
-				onlineTest = $" (online merge {CountOfPointToAddSequentially}x)";
+				onlineTest = $" ({EnumAddPointPostBehavior})";
 			}
 			else
 			{
 				onlineTest = "";
 			}
-			
-			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"Speed Test for {onlineTest} {SelectedGeneratorDescription}" };
+
+			var tmp = new PlotModel { Title = "ConvexHull Workbench", Subtitle = $"Speed Test for {SelectedGeneratorDescription} {onlineTest}" };
 
 			SetOxyPlotDefaultColorPalette(tmp);
 
@@ -424,11 +448,11 @@ namespace ConvexHullWorkbench
 				{
 					Point[] pointsToAdd = null;
 
-					if (isOnlineTest)
-					{
-						GeneratePoints(_countOfPointToAddSequentially);
-						pointsToAdd = _points;
-					}
+					//if (isOnlineTest)
+					//{
+					//	GeneratePoints(_countOfPointToAddSequentially);
+					//	pointsToAdd = _points;
+					//}
 
 					GeneratePoints();
 
@@ -443,7 +467,12 @@ namespace ConvexHullWorkbench
 
 						AlgorithmStat stat;
 						Stopwatch stopwatch = new Stopwatch();
-						IReadOnlyList<Point> result = null;
+
+						Point[] resultPoints = new Point[2];
+						resultPoints[0] = _points[0];
+						resultPoints[1] = _points[1];
+						IReadOnlyList<Point> result = resultPoints;
+
 						TimeSpan timeSpanTotal = new TimeSpan();
 
 						if (isOnlineTest)
@@ -452,49 +481,92 @@ namespace ConvexHullWorkbench
 							var algoOnline = algo as AlgorithmOnline;
 
 							stat = new AlgorithmStat();
-							if (algoStd != null)
-							{
-								stopwatch.Reset();
-								stopwatch.Start();
-								result = algoStd.Calc(_points, stat);
-								stopwatch.Stop();
-								stat.TimeSpanCSharp = stopwatch.Elapsed;
-								timeSpanTotal += stat.BestTimeSpan;
-							}
-							else
-							{
-								stopwatch.Reset();
-								stopwatch.Start();
-								algoOnline.Init();
-								var cho = algoOnline.Algo as ConvexHull;
-								foreach (Point pt in _points)
-								{
-									cho.TryAddOnePoint(pt);
-								}
-								result = algoOnline.GetResult();
-								stopwatch.Stop();
+							//if (algoStd != null)
+							//{
+							//	stopwatch.Reset();
+							//	stopwatch.Start();
+							//	result = algoStd.Calc(_points, stat);
+							//	stopwatch.Stop();
+							//	stat.TimeSpanCSharp = stopwatch.Elapsed;
+							//	timeSpanTotal += stat.BestTimeSpan;
+							//}
+							//else
+							//{
+							//	stopwatch.Reset();
+							//	stopwatch.Start();
+							//	algoOnline.Init();
+							//	var cho = algoOnline.Algo as ConvexHull;
+							//	foreach (Point pt in _points)
+							//	{
+							//		cho.TryAddOnePoint(pt);
+							//	}
+							//	result = algoOnline.GetResult();
+							//	stopwatch.Stop();
 
-								timeSpanTotal += stopwatch.Elapsed;
-							}
+							//	timeSpanTotal += stopwatch.Elapsed;
+							//}
 
 							if (algoOnline != null)
 							{
-								var cho = algoOnline.Algo as ConvexHull;
+								if (algoOnline.Algo == null)
+								{
+									algoOnline.Init();
+								}
+
+								//var cho = algoOnline.Algo as OuelletConvexHullAvl3.ConvexHull;
+
+								result = null;
 
 								stopwatch.Reset();
 								stopwatch.Start();
-								foreach (Point point in pointsToAdd)
+								foreach (Point point in _points)
 								{
-									cho.TryAddOnePoint(point);
-									result = algoOnline.GetResult();
+									// cho.TryAddOnePoint(point);
+									bool isAdded = algoOnline.AddPoint(point);
+
+									switch (EnumAddPointPostBehavior)
+									{
+										case EnumAddPointPostBehavior.QueryPreviousOrNextPointOnlyWhenPointIsConvexHullAdded:
+											{
+												if (isAdded)
+												{
+													var cho = algoOnline.Algo as OuelletConvexHullAvl3.ConvexHull;
+													cho.GetPreviousPoint(point);
+												}
+												break;
+											}
+										case EnumAddPointPostBehavior.GetResultAsArrayOfPointAlways:
+											{
+												result = algoOnline.GetResult();
+												break;
+											}
+										case EnumAddPointPostBehavior.GetResultAsArrayOfPointOnlyWhenPointIsConvexHullAdded:
+											{
+												if (isAdded)
+												{
+													result = algoOnline.GetResult();
+
+												}
+												break;
+											}
+										case EnumAddPointPostBehavior.DoNothing:
+											{
+												break;
+											}
+									}
 								}
 								stopwatch.Stop();
+
+								if (result == null)
+								{
+									result = algoOnline.GetResult();
+								}
 
 								timeSpanTotal += stopwatch.Elapsed;
 							}
 							else
 							{
-								foreach (Point point in pointsToAdd)
+								foreach (Point point in _points)
 								{
 									stopwatch.Reset();
 									stopwatch.Start();
@@ -687,8 +759,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.PointsRef.Count; ptIndex++)
 						{
 							series.Points.Add(new DataPoint(diffs.PointsRef[ptIndex].X, diffs.PointsRef[ptIndex].Y));
-							// new DataPoint(0, 0));
-						}
+						// new DataPoint(0, 0));
+					}
 
 						tmp.Series.Add(series);
 
@@ -702,7 +774,7 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.Points.Count; ptIndex++)
 						{
 							series.Points.Add(new DataPoint(diffs.Points[ptIndex].X, diffs.Points[ptIndex].Y)); // new DataPoint(0, 0));
-						}
+					}
 
 						tmp.Series.Add(series);
 
@@ -716,8 +788,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.UnwantedPoints.Count; ptIndex++)
 						{
 							scatterSeries.Points.Add(new ScatterPoint(diffs.UnwantedPoints[ptIndex].X, diffs.UnwantedPoints[ptIndex].Y));
-							// new DataPoint(0, 0));
-						}
+						// new DataPoint(0, 0));
+					}
 
 						tmp.Series.Add(scatterSeries);
 
@@ -731,8 +803,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.MissingPoints.Count; ptIndex++)
 						{
 							scatterSeries.Points.Add(new ScatterPoint(diffs.MissingPoints[ptIndex].X, diffs.MissingPoints[ptIndex].Y));
-							// new DataPoint(0, 0));
-						}
+						// new DataPoint(0, 0));
+					}
 
 						tmp.Series.Add(scatterSeries);
 
@@ -833,7 +905,7 @@ namespace ConvexHullWorkbench
 						if (Global.Instance.IsCancel)
 						{
 							MessageBox.Show("Side by side test cancelled"); // GUI in model... i'm lazy, sorry.
-							Global.Instance.ResetCancel();
+						Global.Instance.ResetCancel();
 							return;
 						}
 
@@ -1130,7 +1202,7 @@ namespace ConvexHullWorkbench
 
 			Point[] pointsOnlineCall = convexHull.GetResultsAsArrayOfPoint();
 
-			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points, 
+			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points,
 				pointsStandardCall, pointsOnlineCall);
 			Debug.Assert(diffs.HasErrors == false);
 
@@ -1152,7 +1224,7 @@ namespace ConvexHullWorkbench
 			ConvexHull convexHullOnline2 = new ConvexHull();
 			convexHullOnline2.CalcConvexHull(allPoints);
 
-			diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points, 
+			diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points,
 				convexHull.GetResultsAsArrayOfPoint(), convexHullOnline2.GetResultsAsArrayOfPoint());
 
 			Debug.Assert(diffs.HasErrors == false);
