@@ -254,7 +254,9 @@ namespace ConvexHullWorkbench
 			Debug.Assert(ch.GetNextPoint(new Point(4,5)) == default(Point));
 			Debug.Assert(ch.Count == 2);
 
-
+			var neighbors = ch.GetNeighbors(points[0]);
+			Debug.Assert(neighbors.Item1 == points[1]);
+			Debug.Assert(neighbors.Item2 == points[1]);
 
 			points = new List<Point>();
 			ch = new ConvexHull();
@@ -272,8 +274,11 @@ namespace ConvexHullWorkbench
 			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
 			Debug.Assert(ch.Count == 2);
 
+			neighbors = ch.GetNeighbors(points[0]);
+			Debug.Assert(neighbors.Item1 == points[1]);
+			Debug.Assert(neighbors.Item2 == points[1]);
 
-
+			
 
 			points = new List<Point>();
 			ch = new ConvexHull();
@@ -291,6 +296,9 @@ namespace ConvexHullWorkbench
 			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
 			Debug.Assert(ch.Count == 2);
 
+			neighbors = ch.GetNeighbors(points[0]);
+			Debug.Assert(neighbors.Item1 == points[1]);
+			Debug.Assert(neighbors.Item2 == points[1]);
 
 			points = new List<Point>();
 			ch = new ConvexHull();
@@ -305,6 +313,10 @@ namespace ConvexHullWorkbench
 			Debug.Assert(ch.GetNextPoint(new Point(3, 3)) == new Point(3, 3));
 			Debug.Assert(ch.GetNextPoint(new Point(4, 5)) == default(Point));
 			Debug.Assert(ch.Count == 1);
+
+			neighbors = ch.GetNeighbors(points[0]);
+			Debug.Assert(neighbors.Item1 == points[0]);
+			Debug.Assert(neighbors.Item2 == points[0]);
 
 			Task.Run(new Action(() =>
 			{
@@ -867,10 +879,17 @@ namespace ConvexHullWorkbench
 		}
 
 		// ************************************************************************
-		private void ButtonClick(object sender, RoutedEventArgs e)
+		private void Resize1Click(object sender, RoutedEventArgs e)
 		{
-			GridWithCols.ColumnDefinitions[0].Width = new GridLength(800);
-			GridWithRows.RowDefinitions[0].Height = new GridLength(500);
+			GridWithCols.ColumnDefinitions[0].Width = new GridLength(777);
+			GridWithRows.RowDefinitions[0].Height = new GridLength(480);
+		}
+
+		// ************************************************************************
+		private void Resize2Click(object sender, RoutedEventArgs e)
+		{
+			GridWithCols.ColumnDefinitions[0].Width = new GridLength(777);
+			GridWithRows.RowDefinitions[0].Height = new GridLength(250);
 		}
 
 		// ************************************************************************

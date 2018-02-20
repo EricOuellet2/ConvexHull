@@ -97,7 +97,7 @@ namespace OuelletConvexHullAvl3
 		
 		// ******************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override int IsHullPoint(ref Point point)
+		internal override EnumConvexHullPoint IsHullPoint(ref Point point)
 		{
 			CurrentNode = Root;
 			AvlNode<Point> currentPrevious = null;
@@ -116,12 +116,12 @@ namespace OuelletConvexHullAvl3
 					currentPrevious = CurrentNode.GetPreviousNode();
 					if (CanQuickReject(ref point, ref currentPrevious.Item))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					if (!IsPointToTheRightOfOthers(currentPrevious.Item, CurrentNode.Item, point))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 				}
 				else if (point.X < CurrentNode.Item.X)
@@ -135,12 +135,12 @@ namespace OuelletConvexHullAvl3
 					currentNext = CurrentNode.GetNextNode();
 					if (CanQuickReject(ref point, ref currentNext.Item))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 				}
 				else
@@ -149,19 +149,19 @@ namespace OuelletConvexHullAvl3
 					{
 						if (point.Y == CurrentNode.Item.Y)
 						{
-							return -1;
+							return EnumConvexHullPoint .AlreadyExists;
 						}
 
-						return 0; // invalid point
+						return EnumConvexHullPoint.NotConvexHullPoint; // invalid point
 					}
 
-					return 1;
+					return EnumConvexHullPoint.ConvexHullPoint;
 				}
 
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
-			return 0;
+			return EnumConvexHullPoint.NotConvexHullPoint;
 		}
 
 		// ******************************************************************
@@ -170,7 +170,7 @@ namespace OuelletConvexHullAvl3
 		/// It is specific by Quadrant to improve efficiency.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override int ProcessPoint(ref Point point)
+		internal override EnumConvexHullPoint ProcessPoint(ref Point point)
 		{
 			CurrentNode = Root;
 			AvlNode<Point> currentPrevious = null;
@@ -180,7 +180,7 @@ namespace OuelletConvexHullAvl3
 			{
 				if (CanQuickReject(ref point, ref CurrentNode.Item))
 				{
-					return 0;
+					return EnumConvexHullPoint.NotConvexHullPoint;
 				}
 
 				var insertionSide = Side.Unknown;
@@ -195,12 +195,12 @@ namespace OuelletConvexHullAvl3
 					currentPrevious = CurrentNode.GetPreviousNode();
 					if (CanQuickReject(ref point, ref currentPrevious.Item))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					if (!IsPointToTheRightOfOthers(currentPrevious.Item, CurrentNode.Item, point))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					insertionSide = Side.Left;
@@ -216,12 +216,12 @@ namespace OuelletConvexHullAvl3
 					currentNext = CurrentNode.GetNextNode();
 					if (CanQuickReject(ref point, ref currentNext.Item))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					if (!IsPointToTheRightOfOthers(CurrentNode.Item, currentNext.Item, point))
 					{
-						return 0;
+						return EnumConvexHullPoint.NotConvexHullPoint;
 					}
 
 					insertionSide = Side.Right;
@@ -232,16 +232,16 @@ namespace OuelletConvexHullAvl3
 					{
 						if (point.Y == CurrentNode.Item.Y)
 						{
-							return -1;
+							return EnumConvexHullPoint.AlreadyExists;
 						}
 
-						return 0; // invalid point
+						return EnumConvexHullPoint.NotConvexHullPoint; // invalid point
 					}
 
 					// Replace CurrentNode point with point
 					CurrentNode.Item = point;
 					InvalidateNeighbors(CurrentNode.GetPreviousNode(), CurrentNode, CurrentNode.GetNextNode());
-					return 1;
+					return EnumConvexHullPoint.ConvexHullPoint;
 				}
 
 				//We should insert the point
@@ -254,7 +254,7 @@ namespace OuelletConvexHullAvl3
 					{
 						CurrentNode.Item = point;
 						InvalidateNeighbors(currentPrevious, CurrentNode, currentNext);
-						return 1;
+						return EnumConvexHullPoint.ConvexHullPoint;
 					}
 
 					var nextNext = currentNext.GetNextNode();
@@ -262,7 +262,7 @@ namespace OuelletConvexHullAvl3
 					{
 						currentNext.Item = point;
 						InvalidateNeighbors(null, currentNext, nextNext);
-						return 1;
+						return EnumConvexHullPoint.ConvexHullPoint;
 					}
 				}
 				else // Left
@@ -272,7 +272,7 @@ namespace OuelletConvexHullAvl3
 					{
 						CurrentNode.Item = point;
 						InvalidateNeighbors(currentPrevious, CurrentNode, currentNext);
-						return 1;
+						return EnumConvexHullPoint.ConvexHullPoint;
 					}
 
 					var previousPrevious = currentPrevious.GetPreviousNode();
@@ -280,7 +280,7 @@ namespace OuelletConvexHullAvl3
 					{
 						currentPrevious.Item = point;
 						InvalidateNeighbors(previousPrevious, currentPrevious, null);
-						return 1;
+						return EnumConvexHullPoint.ConvexHullPoint;
 					}
 				}
 
@@ -301,10 +301,10 @@ namespace OuelletConvexHullAvl3
 					this.AddBalance(newNode.Parent, 1);
 				}
 
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
-			return 0;
+			return EnumConvexHullPoint.NotConvexHullPoint;
 		}
 
 		// ******************************************************************

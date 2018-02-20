@@ -12,7 +12,7 @@ namespace ConvexHullWorkbench
 	{
 		GetResultAsArrayOfPointAlways = 0,
 		GetResultAsArrayOfPointOnlyWhenPointIsConvexHullAdded = 1,
-		QueryPreviousOrNextPointOnlyWhenPointIsConvexHullAdded = 2,
+		QueryOnlyNeighborsWhenPointIsConvexHullAdded = 2,
 		DoNothing = 3,		
 	}
 }

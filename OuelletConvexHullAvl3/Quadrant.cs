@@ -82,7 +82,7 @@ namespace OuelletConvexHullAvl3
 
 		// ************************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal abstract int IsHullPoint(ref Point point);
+		internal abstract EnumConvexHullPoint IsHullPoint(ref Point point);
 
 		// ************************************************************************
 		/// <summary>
@@ -90,7 +90,7 @@ namespace OuelletConvexHullAvl3
 		/// </summary>
 		/// <param name="point"></param>
 		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>
-		internal abstract int ProcessPoint(ref Point point);
+		internal abstract EnumConvexHullPoint ProcessPoint(ref Point point);
 
 		// ************************************************************************
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

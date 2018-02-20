@@ -526,12 +526,12 @@ namespace ConvexHullWorkbench
 
 									switch (EnumAddPointPostBehavior)
 									{
-										case EnumAddPointPostBehavior.QueryPreviousOrNextPointOnlyWhenPointIsConvexHullAdded:
+										case EnumAddPointPostBehavior.QueryOnlyNeighborsWhenPointIsConvexHullAdded:
 											{
 												if (isAdded)
 												{
 													var cho = algoOnline.Algo as OuelletConvexHullAvl3.ConvexHull;
-													cho.GetPreviousPoint(point);
+													cho.GetNeighbors(point);
 												}
 												break;
 											}
@@ -684,7 +684,8 @@ namespace ConvexHullWorkbench
 					pts[1].X = this.CountOfPointMax;
 					pts[1].Y = slope * pts[1].X + yIntercept;
 
-					AddSeriesLines(pts, PlotModel, series.Title + " (Linear Regression)", MarkerType.Circle, 1, 1, series.ActualMarkerFillColor);
+					// AddSeriesLines(pts, PlotModel, series.Title + " (Linear Regression)", MarkerType.Circle, 1, 1, series.ActualMarkerFillColor);
+					AddSeriesLines(pts, PlotModel, null, MarkerType.Circle, 1, 1, series.ActualMarkerFillColor);
 				}
 
 				Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -699,8 +700,16 @@ namespace ConvexHullWorkbench
 		{
 			if (points != null && points.Count > 0)
 			{
+				LineSeries series;
+				if (title == null)
+				{
+					series = new LineSeries {MarkerType = markerType, MarkerSize = markerSize, StrokeThickness = strokeTickness};
+				}
+				else
+				{
+					series = new LineSeries { Title = title, MarkerType = markerType, MarkerSize = markerSize, StrokeThickness = strokeTickness };
+				}
 
-				var series = new LineSeries() { Title = title, MarkerType = markerType, MarkerSize = markerSize, StrokeThickness = strokeTickness };
 				for (int ptIndex = 0; ptIndex < points.Count; ptIndex++)
 				{
 					series.Points.Add(new DataPoint(points[ptIndex].X, points[ptIndex].Y));
@@ -759,8 +768,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.PointsRef.Count; ptIndex++)
 						{
 							series.Points.Add(new DataPoint(diffs.PointsRef[ptIndex].X, diffs.PointsRef[ptIndex].Y));
-						// new DataPoint(0, 0));
-					}
+							// new DataPoint(0, 0));
+						}
 
 						tmp.Series.Add(series);
 
@@ -774,7 +783,7 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.Points.Count; ptIndex++)
 						{
 							series.Points.Add(new DataPoint(diffs.Points[ptIndex].X, diffs.Points[ptIndex].Y)); // new DataPoint(0, 0));
-					}
+						}
 
 						tmp.Series.Add(series);
 
@@ -788,8 +797,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.UnwantedPoints.Count; ptIndex++)
 						{
 							scatterSeries.Points.Add(new ScatterPoint(diffs.UnwantedPoints[ptIndex].X, diffs.UnwantedPoints[ptIndex].Y));
-						// new DataPoint(0, 0));
-					}
+							// new DataPoint(0, 0));
+						}
 
 						tmp.Series.Add(scatterSeries);
 
@@ -803,8 +812,8 @@ namespace ConvexHullWorkbench
 						for (int ptIndex = 0; ptIndex < diffs.MissingPoints.Count; ptIndex++)
 						{
 							scatterSeries.Points.Add(new ScatterPoint(diffs.MissingPoints[ptIndex].X, diffs.MissingPoints[ptIndex].Y));
-						// new DataPoint(0, 0));
-					}
+							// new DataPoint(0, 0));
+						}
 
 						tmp.Series.Add(scatterSeries);
 
@@ -905,7 +914,7 @@ namespace ConvexHullWorkbench
 						if (Global.Instance.IsCancel)
 						{
 							MessageBox.Show("Side by side test cancelled"); // GUI in model... i'm lazy, sorry.
-						Global.Instance.ResetCancel();
+							Global.Instance.ResetCancel();
 							return;
 						}
 
@@ -1202,8 +1211,7 @@ namespace ConvexHullWorkbench
 
 			Point[] pointsOnlineCall = convexHull.GetResultsAsArrayOfPoint();
 
-			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points,
-				pointsStandardCall, pointsOnlineCall);
+			DifferencesInPath diffs = ConvexHullUtil.GetPathDifferences(nameof(ConvexHull), _points, pointsStandardCall, pointsOnlineCall);
 			Debug.Assert(diffs.HasErrors == false);
 
 			convexHull = new ConvexHull();
@@ -1218,9 +1226,19 @@ namespace ConvexHullWorkbench
 
 			foreach (Point pt in _points)
 			{
-				convexHull.TryAddOnePoint(pt);
+				if (convexHull.TryAddOnePoint(pt) == EnumConvexHullPoint.ConvexHullPoint)
+				{
+					// Do nothing if only knowing if Hull point or not is enough
+
+					// Get Only neighbors if enough
+					var neighbors = convexHull.GetNeighbors(pt);
+
+					// Query full result as an array
+					var convexHullPoints = convexHull.GetResultsAsArrayOfPoint();
+				}
 			}
 
+			// HERE: Verifying previous result
 			ConvexHull convexHullOnline2 = new ConvexHull();
 			convexHullOnline2.CalcConvexHull(allPoints);
 

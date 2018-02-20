@@ -89,6 +89,7 @@
     <Compile Include="ConvexHullEnumerator.cs" />
     <Compile Include="ConvexHullResultIntegrityException.cs" />
     <Compile Include="ConvexHullThreadUsage.cs" />
+    <Compile Include="EnumConvexHullPoint.cs" />
     <Compile Include="Util\EnumerableWrapper.cs" />
     <Compile Include="Limit.cs" />
     <Compile Include="Util\Geometry.cs" />

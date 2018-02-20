@@ -593,9 +593,9 @@ namespace OuelletConvexHullAvl3
 		/// <param name="point"></param>
 		/// <returns>1 = hull point, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int EvaluatePointForPointInsideQuadrantLimits(Point point)
+		private EnumConvexHullPoint EvaluatePointForPointInsideQuadrantLimits(Point point)
 		{
-			int result;
+			EnumConvexHullPoint result;
 
 			if (point.X > _q1.RootPoint.X && point.Y > _q1.RootPoint.Y)
 			{
@@ -613,7 +613,7 @@ namespace OuelletConvexHullAvl3
 					return _q3.IsHullPoint(ref point);
 				}
 
-				return 0;
+				return EnumConvexHullPoint.NotConvexHullPoint;
 			}
 
 			if (point.X < _q2.RootPoint.X && point.Y > _q2.RootPoint.Y)
@@ -632,7 +632,7 @@ namespace OuelletConvexHullAvl3
 					return _q4.IsHullPoint(ref point);
 				}
 
-				return 0;
+				return EnumConvexHullPoint.NotConvexHullPoint;
 			}
 
 			if (point.X < _q3.RootPoint.X && point.Y < _q3.RootPoint.Y)
@@ -642,7 +642,7 @@ namespace OuelletConvexHullAvl3
 					return _q3.IsHullPoint(ref point);
 				}
 
-				return 0;
+				return EnumConvexHullPoint.NotConvexHullPoint;
 			}
 
 			if (point.X > _q4.RootPoint.X && point.Y < _q4.RootPoint.Y)
@@ -652,10 +652,10 @@ namespace OuelletConvexHullAvl3
 					return _q4.IsHullPoint(ref point);
 				}
 
-				return 0;
+				return EnumConvexHullPoint.NotConvexHullPoint;
 			}
 
-			return 0;
+			return EnumConvexHullPoint.NotConvexHullPoint;
 		}
 
 		// ************************************************************************
@@ -665,9 +665,9 @@ namespace OuelletConvexHullAvl3
 		/// <param name="point"></param>
 		/// <returns>1 = added, 0 = not a convex hull point, -1 convex hull point already exists</returns>		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int ProcessPointForNotDisjointQuadrant(Point point)
+		private EnumConvexHullPoint ProcessPointForNotDisjointQuadrant(Point point)
 		{
-			int result;
+			EnumConvexHullPoint result;
 
 			if (point.X > _q1.RootPoint.X && point.Y > _q1.RootPoint.Y)
 			{
@@ -773,10 +773,67 @@ namespace OuelletConvexHullAvl3
 
 		// ******************************************************************
 		/// <summary>
-		/// Return the next neighbor of the item is exists. 
+		/// Return the neighbors of the item if exists. 
 		/// Otherwise it retuen default(Point).
 		/// Not super efficient. If you wan tto iterate over all points. It is 
 		/// better to call GetResultsAsArrayOfPoint() instead.
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns>Same point if only one. Neighbors if any.</returns>
+		public Tuple<Point, Point> GetNeighbors(Point pt)
+		{
+			if (Count <= 1)
+			{
+				if (Count == 1)
+				{
+					if (_q1.FirstPoint == pt)
+					{
+						return new Tuple<Point, Point>(pt, pt);
+					}
+				}
+			}
+			else
+			{
+				AvlNode<Point> node = null;
+
+				Quadrant q = _q1;
+				do
+				{
+					if (q.IsGoodQuadrantForPoint(pt))
+					{
+						node = q.GetNode(pt);
+						if (node != null)
+						{
+							var nodePrevious = node.GetPreviousNode();
+							if (nodePrevious == null)
+							{
+								nodePrevious = GetPreviousNodeNotBeingPoint(q, pt);
+							}
+
+							var nodeNext = node.GetNextNode();
+							if (nodeNext == null)
+							{
+								nodeNext = GetNextNodeNotBeingPoint(q, pt);
+							}
+
+							return new Tuple<Point, Point>(nodePrevious.Item, nodeNext.Item);
+						}
+					}
+
+					q = q.GetNextQuadrant();
+				} while (q != _q1);
+			}
+
+			return null;
+		}
+
+		// ******************************************************************
+		/// <summary>
+		/// Return the next neighbor of the item is exists. 
+		/// Otherwise it retuen default(Point).
+		/// Not super efficient. If you want to iterate over all points, it is 
+		/// better to call either the iterator (iterate once) or 
+		/// GetResultsAsArrayOfPoint() instead (iterate more than once).
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>Same point if only one. Next point if more than one and point exists. default(Point) otherwise (not found)</returns>
@@ -810,7 +867,7 @@ namespace OuelletConvexHullAvl3
 								return node.Item;
 							}
 							
-							return GetNextNodeNotBeingPoint(q, pt);
+							return GetNextNodeNotBeingPoint(q, pt).Item;
 						}
 					}
 
@@ -825,8 +882,9 @@ namespace OuelletConvexHullAvl3
 		/// <summary>
 		/// Return the previous neighbor of the item is exists. 
 		/// Otherwise it retuen default(Point).
-		/// Not super efficient. If you wan tto iterate over all points. It is 
-		/// better to call GetResultsAsArrayOfPoint() instead.
+		/// Not super efficient. If you want to iterate over all points, it is 
+		/// better to call either the iterator (iterate once) or 
+		/// GetResultsAsArrayOfPoint() instead (iterate more than once).
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>Same point if only one. Next point if more than one and point exists. default(Point) otherwise (not found)</returns>
@@ -860,7 +918,7 @@ namespace OuelletConvexHullAvl3
 								return node.Item;
 							}
 
-							return GetPreviousNodeNotBeingPoint(q, pt);
+							return GetPreviousNodeNotBeingPoint(q, pt).Item;
 						}
 					}
 
@@ -878,21 +936,21 @@ namespace OuelletConvexHullAvl3
 		/// <param name="q">Quadrant where the point has no next node</param>
 		/// <param name="pt">Last point of a quadrant</param>
 		/// <returns></returns>
-		private Point GetNextNodeNotBeingPoint(Quadrant q, Point pt)
+		private AvlNode<Point> GetNextNodeNotBeingPoint(Quadrant q, Point pt)
 		{
 			for (; ; )
 			{
 				q = q.GetNextQuadrant();
-				AvlNode<Point> node = q.GetFirstNode();
-				if (node.Item != pt)
+				AvlNode<Point> nodeNext = q.GetFirstNode();
+				if (nodeNext.Item != pt)
 				{
-					return node.Item;
+					return nodeNext;
 				}
 
-				node = node.GetNextNode();
-				if (node != null)
+				nodeNext = nodeNext.GetNextNode();
+				if (nodeNext != null)
 				{
-					return node.Item;
+					return nodeNext;
 				}
 			}
 		}
@@ -904,21 +962,21 @@ namespace OuelletConvexHullAvl3
 		/// <param name="q">Quadrant where the point has no next node</param>
 		/// <param name="pt">Last point of a quadrant</param>
 		/// <returns></returns>
-		private Point GetPreviousNodeNotBeingPoint(Quadrant q, Point pt)
+		private AvlNode<Point> GetPreviousNodeNotBeingPoint(Quadrant q, Point pt)
 		{
 			for (; ; )
 			{
 				q = q.GetPreviousQuadrant();
-				AvlNode<Point> node = q.GetLastNode();
-				if (node.Item != pt)
+				AvlNode<Point> nodePrevious = q.GetLastNode();
+				if (nodePrevious.Item != pt)
 				{
-					return node.Item;
+					return nodePrevious;
 				}
 
-				node = node.GetPreviousNode();
-				if (node != null)
+				nodePrevious = nodePrevious.GetPreviousNode();
+				if (nodePrevious != null)
 				{
-					return node.Item;
+					return nodePrevious;
 				}
 			}
 		}
@@ -932,11 +990,11 @@ namespace OuelletConvexHullAvl3
 		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>-1 point already exists, 0 point not part of the convex hull, 1 point will be added if asked for</returns>
-		public int Evaluate(Point pt)
+		public EnumConvexHullPoint Evaluate(Point pt)
 		{
 			if (!IsInitDone)
 			{
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
 			//
@@ -1058,7 +1116,7 @@ namespace OuelletConvexHullAvl3
 
 			if (limitAffectd != 0)
 			{
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
 			return EvaluatePointForPointInsideQuadrantLimits(pt);
@@ -1067,12 +1125,13 @@ namespace OuelletConvexHullAvl3
 		// ************************************************************************
 		/// <summary>
 		/// Will add another point to the convex hull if appropriate.
+		/// Return -1 point already exists, 0 point not part of the convex hull, 1 point added.
+		/// </summary>
 		/// Duplication of code (partial or complete is intentional in order 
 		/// keep best performance)
-		/// </summary>
 		/// <param name="pt"></param>
 		/// <returns>-1 point already exists, 0 point not part of the convex hull, 1 point added</returns>
-		public int TryAddOnePoint(Point pt)
+		public EnumConvexHullPoint TryAddOnePoint(Point pt)
 		{
 			if (!IsInitDone)
 			{
@@ -1085,7 +1144,7 @@ namespace OuelletConvexHullAvl3
 				_q2.Prepare();
 				_q3.Prepare();
 				_q4.Prepare();
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
 			//
@@ -1339,7 +1398,7 @@ namespace OuelletConvexHullAvl3
 					Bottom = pt.Y;
 				}
 
-				return 1;
+				return EnumConvexHullPoint.ConvexHullPoint;
 			}
 
 			//
@@ -2139,16 +2198,20 @@ namespace OuelletConvexHullAvl3
 			{
 				Debug.Assert(results[index] == pt);
 				Point ptNext = GetNextPoint(pt);
-				int indexTemp = index >= results.Length - 1 ? 0 : index + 1;
-				Debug.Assert(ptNext == results[indexTemp]);
+				int indexNext = index >= results.Length - 1 ? 0 : index + 1;
+				Debug.Assert(ptNext == results[indexNext]);
 
 				Point ptPrevious = GetPreviousPoint(pt);
-				indexTemp = index == 0 ? results.Length - 2 : index - 1;
-				if (indexTemp < 0) // When results.length = 1
+				int indexPrevious = index == 0 ? results.Length - 2 : index - 1;
+				if (indexPrevious < 0) // When results.length = 1
 				{
-					indexTemp = 0;
+					indexPrevious = 0;
 				}
-				Debug.Assert(ptPrevious == results[indexTemp]);
+				Debug.Assert(ptPrevious == results[indexPrevious]);
+
+				var neighbors = GetNeighbors(pt);
+				Debug.Assert(neighbors.Item1 == results[indexPrevious]);
+				Debug.Assert(neighbors.Item2 == results[indexNext]);
 
 				index++;
 				if (index >= results.Length -1)

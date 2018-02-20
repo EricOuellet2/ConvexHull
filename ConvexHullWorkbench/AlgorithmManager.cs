@@ -10,6 +10,7 @@ using Mathematic;
 using MonotoneChain;
 using System.Windows.Media;
 using ConvexHullHelper;
+using OuelletConvexHullAvl3;
 
 namespace ConvexHullWorkbench
 {
@@ -343,12 +344,12 @@ namespace ConvexHullWorkbench
 					}
 
 					Stopwatch stopwatch = Stopwatch.StartNew();
-					int result = convexHullOnline.TryAddOnePoint(pt);
+					EnumConvexHullPoint result = convexHullOnline.TryAddOnePoint(pt);
 					stopwatch.Stop();
 
 					stat.TimeSpanCSharp = stat.TimeSpanCSharp.Add(stopwatch.Elapsed);
 
-					return result == 1;
+					return result == EnumConvexHullPoint.ConvexHullPoint;
 				},
 
 				(Object obj) =>
