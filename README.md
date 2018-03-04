@@ -12,4 +12,5 @@ IMPORTANT: If it crash or does not works. It could be related to C++ files. Try 
 
 2018-02-06, Update: The code should be close to the one that will be available in the next article about Online Convex Hull (dynamic add).
 The article should be available in a month or so.
+
 2018-03-03, Update: Add code to remove all warning (mainly GetHashCode). Fixed compilation of C++ dlls folders. Added MSVCRT dlls to make it easier to compile and run on any environment.
