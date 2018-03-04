@@ -94,6 +94,12 @@
 		}
 
 		// ******************************************************************
+		public override int GetHashCode()
+		{
+			return Item.GetHashCode() + Left?.Item.GetHashCode() ?? 0 + Right?.Item.GetHashCode() ?? 0 + Balance;
+		}
+
+		// ******************************************************************
 		public override bool Equals(object obj)
 		{
 			if (obj == null)

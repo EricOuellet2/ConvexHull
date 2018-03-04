@@ -1349,6 +1349,17 @@ namespace OuelletConvexHullAvl3.AvlTreeSet
 		}
 
 		// ******************************************************************
+		public override int GetHashCode()
+		{
+			if (Root == null)
+			{
+				return 0;
+			}
+
+			return Root.Item.GetHashCode() + (Count ^ ~Root.Balance);
+		}
+
+		// ******************************************************************
 		public override bool Equals(object obj)
 		{
 			if (obj == null)

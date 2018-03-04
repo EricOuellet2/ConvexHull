@@ -317,12 +317,27 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="msvcp140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vccorlib140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vcomp140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vcruntime140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if $(PlatformName) == "x86" (
-  copy $(SolutionDir)\Win32\Release\PatMorin*.* $(TargetDir)
-) else (
-copy $(SolutionDir)\x64\Release\PatMorin*.* $(TargetDir)
+    <PostBuildEvent>if "$(PlatformName)" == "x86" ( 
+  copy "$(SolutionDir)Win32\$(ConfigurationName)\PatMorin*.*" "$(TargetDir)"
+)
+if "$(PlatformName)" == "x64" (
+  copy "$(SolutionDir)x64\$(ConfigurationName)\PatMorin*.*" "$(TargetDir)"
 )
 </PostBuildEvent>
   </PropertyGroup>

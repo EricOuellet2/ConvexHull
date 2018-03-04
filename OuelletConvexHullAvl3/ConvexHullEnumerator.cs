@@ -12,7 +12,6 @@ namespace OuelletConvexHullAvl3
 	public class ConvexHullEnumerator : IEnumerator<Point>
 	{
 		// ******************************************************************
-		private int _count = 0;
 		private ConvexHull _convexHull;
 
 		private Quadrant _currentQuadrant = null;
@@ -22,7 +21,6 @@ namespace OuelletConvexHullAvl3
 		public ConvexHullEnumerator(ConvexHull convexHull)
 		{
 			_convexHull = convexHull;
-			_count = 0;
 		}
 
 		// ******************************************************************

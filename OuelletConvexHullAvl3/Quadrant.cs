@@ -190,6 +190,12 @@ namespace OuelletConvexHullAvl3
 		}
 
 		// ************************************************************************
+		public override int GetHashCode()
+		{
+			return base.GetHashCode() + RootPoint.GetHashCode() + FirstPoint.GetHashCode() + LastPoint.GetHashCode();
+		}
+
+		// ************************************************************************
 		public override bool Equals(object obj)
 		{
 			if (obj == null)

@@ -446,8 +446,6 @@ namespace ConvexHullWorkbench
 
 				for (Iteration = 0; Iteration < CountOfTest; Iteration++)
 				{
-					Point[] pointsToAdd = null;
-
 					//if (isOnlineTest)
 					//{
 					//	GeneratePoints(_countOfPointToAddSequentially);
@@ -612,8 +610,6 @@ namespace ConvexHullWorkbench
 
 							stat.TimeSpanCSharp = stopwatch.Elapsed; //  TimeSpan.FromTicks(stopwatch.ElapsedTicks);
 							stat.PointCount = _points.Length;
-
-							Debug.Assert(result.Count > _points.Length - 100);
 						}
 
 						stat.ResultCount = result?.Count ?? -1;
