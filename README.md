@@ -6,9 +6,9 @@ It contains:
  - A workbench to test implementations working
  - A workbench to test and compare implementations performance
 
-IMPORTANT: THe code is made to RUN on "Release" - "x64". It can run in "Debug" - "x64". But you should avoid any other configurations, otherwise you will have problems with any C++ code.
+IMPORTANT: The code is made to RUN on "Release" - "x64". It can run in "Debug" - "x64". But you should avoid any other configurations, otherwise you will have problems with any C++ code.
 
-IMPORTANT: If it crash or does not works. It could be related to C++ files. Try to test without selecting "Chan", "Heap" or "Ouellet CPP".
+IMPORTANT: If it crash or does not works. It could be related to C++ files. Try to test without selecting "Chan", "Heap" or "Ouellet CPP". If everything works but any of the CPP algorithm, it is probably because your are missing Microsoft running libraries (MSVCRT) 4 files. They are available in the related article at Code Project as the "executable" download.
 
 2018-02-06, Update: The code should be close to the one that will be available in the next article about Online Convex Hull (dynamic add).
 The article should be available in a month or so.
